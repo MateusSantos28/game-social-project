@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FireRed Pocket RPG - Protótipo GBA</title>
+    <style>
+        /* ==========================================================================
+           ESTILOS GERAIS & MOLDURA ESTILO GAME BOY ADVANCE / POKÉMON FIRERED
+           ========================================================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --gba-shell: #b8292f;
+            --gba-shell-dark: #7d171c;
+            --gba-shell-light: #df4b51;
+            --bezel-dark: #1c1b22;
+            --bezel-border: #383645;
+            --btn-dark: #2c2b33;
+            --btn-light: #4a4854;
+            --text-light: #f8f8f8;
+            --gold-accent: #ffd447;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #231f2e 0%, #100e17 100%);
+            color: var(--text-light);
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        /* Carcaça estilo GBA SP / FireRed Edition */
+        .gba-console {
+            width: 100%;
+            max-width: 720px;
+            background: linear-gradient(145deg, var(--gba-shell-light), var(--gba-shell) 35%, var(--gba-shell-dark));
+            border: 4px solid #520c10;
+            border-radius: 18px 18px 28px 28px;
+            box-shadow: 0 14px 0 #3d080b, 0 24px 45px rgba(0, 0, 0, 0.75);
+            padding: 14px 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Cabeçalho da Moldura */
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 6px;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.5px;
+        }
+
+        .power-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .led-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #42f56c;
+            box-shadow: 0 0 8px #42f56c;
+        }
+
+        .sound-toggle {
+            background: rgba(0, 0, 0, 0.35);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        /* Moldura Preta da Tela LCD */
+        .screen-bezel {
+            background: var(--bezel-dark);
+            border: 4px solid var(--bezel-border);
+            border-radius: 12px 12px 24px 12px;
+            padding: 12px 12px 18px;
+            box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .viewport-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 2; /* Proporção clássica 240x160 / 336x224 GBA */
+            background: #0f1410;
+            border: 3px solid #090a0d;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Grade sutil de pixels LCD GBA */
+        .lcd-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+            background-size: 3px 3px;
+            pointer-events: none;
+        }
+
+        .bezel-logo {
+            font-size: clamp(9px, 2vw, 12px);
+            color: #9e9cb0;
+            font-style: italic;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .bezel-logo span {
+            color: #ff5c5c;
+            font-style: normal;
+        }
+
+        /* Controles Físicos / Virtuais GBA */
+        .controls-deck {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px 2px;
+            gap: 10px;
+        }
+
+        /* D-Pad em Cruz */
+        .dpad {
+            position: relative;
+            width: 114px;
+            height: 114px;
+            flex-shrink: 0;
+        }
+
+        .dpad-btn {
+            position: absolute;
+            width: 38px;
+            height: 38px;
+            background: var(--btn-dark);
+            border: 2px solid #18171c;
+            color: #9b99a8;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #121117;
+        }
+
+        .dpad-btn:active, .dpad-btn.active {
+            background: var(--btn-light);
+            color: #fff;
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #121117;
+        }
+
+        .dpad-up { top: 0; left: 38px; border-radius: 6px 6px 0 0; }
+        .dpad-down { bottom: 0; left: 38px; border-radius: 0 0 6px 6px; }
+        .dpad-left { top: 38px; left: 0; border-radius: 6px 0 0 6px; }
+        .dpad-right { top: 38px; right: 0; border-radius: 0 6px 6px 0; }
+        .dpad-center {
+            position: absolute;
+            top: 38px;
+            left: 38px;
+            width: 38px;
+            height: 38px;
+            background: var(--btn-dark);
+            pointer-events: none;
+        }
+
+        /* Dicas centrais de Teclado */
+        .center-info {
+            text-align: center;
+            font-size: 8px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .key-hint {
+            color: var(--gold-accent);
+        }
+
+        /* Botões A e B inclinados estilo GBA */
+        .ab-buttons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transform: rotate(-16deg);
+            padding-right: 6px;
+            flex-shrink: 0;
+        }
+
+        .action-btn-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ab-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4e4c59, #24232b);
+            border: 3px solid #141317;
+            box-shadow: 0 4px 0 #111014;
+            color: #e6e4f0;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ab-btn:active, .ab-btn.active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #111014;
+            background: #5a5866;
+        }
+
+        .btn-sublabel {
+            font-size: 7px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        @media (max-width: 560px) {
+            .gba-console {
+                padding: 10px 10px 14px;
+                border-radius: 14px;
+            }
+            .center-info {
+                display: none;
+            }
+            .dpad {
+                width: 96px;
+                height: 96px;
+            }
+            .dpad-btn, .dpad-center {
+                width: 32px;
+                height: 32px;
+            }
+            .dpad-up { left: 32px; }
+            .dpad-down { left: 32px; }
+            .dpad-left { top: 32px; }
+            .dpad-right { top: 32px; }
+            .dpad-center { top: 32px; left: 32px; }
+            .ab-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="gba-console">
+    <!-- Cabeçalho Superior -->
+    <div class="console-header">
+        <div class="power-indicator">
+            <span class="led-dot"></span>
+            <span>POWER • KANTO EDITION</span>
+        </div>
+        <button class="sound-toggle" id="btn-sound">SOM: ON</button>
+    </div>
+
+    <!-- Tela LCD -->
+    <div class="screen-bezel">
+        <div class="viewport-container">
+            <!-- Resolução nativa GBA expandida (336x224 = 21x14 tiles de 16px, proporção 3:2) -->
+            <canvas id="gameCanvas" width="336" height="224"></canvas>
+            <div class="lcd-grid"></div>
+        </div>
+        <div class="bezel-logo">GAME BOY <span>FIRERED</span></div>
+    </div>
+
+    <!-- Controles GBA -->
+    <div class="controls-deck">
+        <!-- Direcional -->
+        <div class="dpad">
+            <button class="dpad-btn dpad-up" id="btn-up" aria-label="Cima">▲</button>
+            <button class="dpad-btn dpad-down" id="btn-down" aria-label="Baixo">▼</button>
+            <button class="dpad-btn dpad-left" id="btn-left" aria-label="Esquerda">◀</button>
+            <button class="dpad-btn dpad-right" id="btn-right" aria-label="Direita">▶</button>
+            <div class="dpad-center"></div>
+        </div>
+
+        <!-- Legenda Desktop -->
+        <div class="center-info">
+            <div><span class="key-hint">SETAS / WASD</span> : ANDAR</div>
+            <div><span class="key-hint">Z / ENTER / ESPAÇO</span> : A (CONFIRMAR)</div>
+            <div><span class="key-hint">X / ESC</span> : B (VOLTAR)</div>
+            <div style="margin-top: 4px; color: #ffcf56;">ANDE NA GRAMA ALTA PARA BATALHAR!</div>
+        </div>
+
+        <!-- Botões B e A -->
+        <div class="ab-buttons">
+            <div class="action-btn-wrap" style="margin-top: 14px;">
+                <button class="ab-btn" id="btn-b" aria-label="Botão B">B</button>
+                <span class="btn-sublabel">VOLTAR</span>
+            </div>
+            <div class="action-btn-wrap">
+                <button class="ab-btn" id="btn-a" aria-label="Botão A">A</button>
+                <span class="btn-sublabel">AÇÃO</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * FIRERED POCKET RPG - MOTOR COMPLETO EM VANILLA JAVASCRIPT
+ * ============================================================================
+ * Módulos:
+ * 1. GBAudio: Efeitos sonoros 8-bit sintetizados via Web Audio API.
+ * 2. PixelSprites: Renderizador procedural de sprites e tiles 16x16 / batalha.
+ * 3. FireRedGame: Overworld em grid, diálogos typewriter, transição e batalha.
+ */
+
+/* ============================================================================
+   1. SISTEMA DE ÁUDIO 8-BIT (WEB AUDIO API)
+   ============================================================================ */
+class GBAudio {
+    constructor() {
+        this.ctx = null;
+        this.muted = false;
+    }
+
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+    }
+
+    tone(f1, f2, dur, type = 'square', vol = 0.09, delay = 0) {
+        if (this.muted) return;
+        this.init();
+        try {
+            const t0 = this.ctx.currentTime + delay;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(f1, t0);
+            if (f2 !== f1) {
+                osc.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t0 + dur);
+            }
+            gain.gain.setValueAtTime(vol, t0);
+            gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + dur);
+        } catch (e) {}
+    }
+
+    confirm() {
+        this.tone(880, 1175, 0.08, 'square', 0.08);
+    }
+
+    blip() {
+        this.tone(660, 660, 0.03, 'square', 0.03);
+    }
+
+    bump() {
+        this.tone(110, 75, 0.08, 'triangle', 0.12);
+    }
+
+    encounter() {
+        const notes = [440, 554, 659, 440, 554, 659, 880, 1108];
+        notes.forEach((n, i) => {
+            this.tone(n, n, 0.06, 'sawtooth', 0.1, i * 0.055);
+        });
+    }
+
+    attackHit() {
+        this.tone(300, 75, 0.14, 'sawtooth', 0.14);
+    }
+
+    ember() {
+        this.tone(520, 140, 0.22, 'sawtooth', 0.12);
+        this.tone(780, 220, 0.18, 'square', 0.09, 0.05);
+    }
+
+    heal() {
+        const notes = [523, 659, 784, 1046];
+        notes.forEach((n, i) => {
+            this.tone(n, n, 0.1, 'triangle', 0.12, i * 0.08);
+        });
+    }
+
+    pokeballThrow() {
+        this.tone(350, 720, 0.18, 'square', 0.09);
+    }
+
+    pokeballWobble() {
+        this.tone(420, 380, 0.07, 'triangle', 0.08);
+    }
+
+    catchSuccess() {
+        const notes = [523, 659, 784, 1046, 784, 1046];
+        notes.forEach((n, i) => {
+            this.tone(n, n, 0.11, 'square', 0.1, i * 0.09);
+        });
+    }
+
+    levelUp() {
+        const notes = [587, 587, 587, 587, 466, 523, 587, 523, 587];
+        notes.forEach((n, i) => {
+            this.tone(n, n, 0.09, 'square', 0.1, i * 0.085);
+        });
+    }
+}
+
+/* ============================================================================
+   2. GERADOR PROCEDURAL DE SPRITES PIXEL ART (PALETA FIRERED / GBA)
+   ============================================================================ */
+class PixelSprites {
+    constructor() {
+        this.cache = {};
+        this.palette = {
+            '.': null,
+            'K': '#181820', // Contorno escuro GBA
+            'W': '#f8f8f8', // Branco puro
+            'R': '#e83030', // Vermelho boné / fogo / telhado
+            'D': '#981818', // Vermelho escuro sombra
+            'B': '#3068d8', // Azul calça / água / mochila
+            'N': '#1c3c88', // Azul escuro
+            'F': '#f8c898', // Pele
+            'S': '#d89868', // Sombra pele
+            'H': '#282428', // Cabelo preto
+            'G': '#48b848', // Grama vibrante FireRed
+            'L': '#88e060', // Grama luz
+            'E': '#207830', // Grama sombra / árvore escura
+            'T': '#885830', // Tronco / madeira
+            'Y': '#f8d030', // Amarelo / flor / cauda fogo
+            'O': '#f07818', // Laranja Charmander
+            'C': '#f8e8b0', // Creme barriga / parede casa
+            'M': '#a0a0b0', // Cinza metal / pedra / Rattata
+            'P': '#9858c8', // Roxo Rattata
+            'V': '#683090', // Roxo escuro
+            'Z': '#b88858'  // Marrom claro Pidgey / terra
+        };
+        this.buildAll();
+    }
+
+    bake(name, rows, flipX = false) {
+        const h = rows.length;
+        const w = rows[0].length;
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d');
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const ch = rows[y][x];
+                const col = this.palette[ch];
+                if (col) {
+                    ctx.fillStyle = col;
+                    ctx.fillRect(flipX ? (w - 1 - x) : x, y, 1, 1);
+                }
+            }
+        }
+        this.cache[name] = c;
+    }
+
+    buildAll() {
+        // --- PROTAGONISTA RED (16x16) ---
+        const redDown0 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '...RRWWWWWRRR...',
+            '...HHHHHHHHHH...',
+            '..HFFFFFFFFFFH..',
+            '..HFFKFFFFKFFH..',
+            '...FFFFFFFFFF...',
+            '....SSSSSSSS....',
+            '..BBKKKKKKKKBB..',
+            '.BRRKKKKKKKKRRB.',
+            '.BRRKKKKKKKKRRB.',
+            '.FF.BBBBBBBB.FF.',
+            '....BBBBBBBB....',
+            '....BBB..BBB....',
+            '...KKK....KKK...',
+            '................'
+        ];
+        const redDown1 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '...RRWWWWWRRR...',
+            '...HHHHHHHHHH...',
+            '..HFFFFFFFFFFH..',
+            '..HFFKFFFFKFFH..',
+            '...FFFFFFFFFF...',
+            '....SSSSSSSS....',
+            '..BBKKKKKKKKBB..',
+            '.BRRKKKKKKKKRRB.',
+            '.FF.KKKKKKKK.RRB',
+            '....BBBBBBBB.FF.',
+            '....BBB..BBB....',
+            '...KKK..........',
+            '..........KKK...',
+            '................'
+        ];
+        const redDown2 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '...RRWWWWWRRR...',
+            '...HHHHHHHHHH...',
+            '..HFFFFFFFFFFH..',
+            '..HFFKFFFFKFFH..',
+            '...FFFFFFFFFF...',
+            '....SSSSSSSS....',
+            '..BBKKKKKKKKBB..',
+            '.BRRKKKKKKKKRRB.',
+            'BRR.KKKKKKKK.FF.',
+            '.FF.BBBBBBBB....',
+            '....BBB..BBB....',
+            '..........KKK...',
+            '...KKK..........',
+            '................'
+        ];
+
+        const redUp0 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '...RRRRRRRRRR...',
+            '...HHHHHHHHHH...',
+            '..HHHHHHHHHHHH..',
+            '..HHHHHHHHHHHH..',
+            '...HHHHHHHHHH...',
+            '....BBBBBBBB....',
+            '..RRRRBBBBBBBB..',
+            '.RRRRRBBBBBBBRR.',
+            '.RRRRRBBBBBBBRR.',
+            '.FF.BBBBBBBB.FF.',
+            '....BBBBBBBB....',
+            '....BBB..BBB....',
+            '...KKK....KKK...',
+            '................'
+        ];
+        const redUp1 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '...RRRRRRRRRR...',
+            '...HHHHHHHHHH...',
+            '..HHHHHHHHHHHH..',
+            '..HHHHHHHHHHHH..',
+            '...HHHHHHHHHH...',
+            '....BBBBBBBB....',
+            '..RRRRBBBBBBBB..',
+            '.RRRRRBBBBBBBRR.',
+            '.FF.RRBBBBBB.RRB',
+            '....BBBBBBBB.FF.',
+            '....BBB..BBB....',
+            '...KKK..........',
+            '..........KKK...',
+            '................'
+        ];
+
+        const redSide0 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '..WWRRRRRRRRR...',
+            '...HHHHHHHHHH...',
+            '...HFFFFFFFFH...',
+            '...HKFFFFFFFH...',
+            '....FFFFFFFF....',
+            '.....SSSSSS.....',
+            '....KKKKKKKKBB..',
+            '...KKKKKKKKRRBB.',
+            '...KKKKKKKKRRBB.',
+            '....FFBBBBBB....',
+            '.....BBBBBB.....',
+            '.....BBBBBB.....',
+            '....KKKKKK......',
+            '................'
+        ];
+        const redSide1 = [
+            '....RRRRRRRR....',
+            '...RRRRRRRRRR...',
+            '..WWRRRRRRRRR...',
+            '...HHHHHHHHHH...',
+            '...HFFFFFFFFH...',
+            '...HKFFFFFFFH...',
+            '....FFFFFFFF....',
+            '.....SSSSSS.....',
+            '....KKKKKKKKBB..',
+            '...KKKKKKKKRRBB.',
+            '....FFKKKKKRRBB.',
+            '.....BBBBBBB....',
+            '....BBBB.BBBB...',
+            '...KKK.....KKK..',
+            '................',
+            '................'
+        ];
+
+        this.bake('red_down_0', redDown0);
+        this.bake('red_down_1', redDown1);
+        this.bake('red_down_2', redDown2);
+
+        this.bake('red_up_0', redUp0);
+        this.bake('red_up_1', redUp1);
+        this.bake('red_up_2', redUp1, true);
+
+        this.bake('red_left_0', redSide0);
+        this.bake('red_left_1', redSide1);
+        this.bake('red_left_2', redSide0);
+
+        this.bake('red_right_0', redSide0, true);
+        this.bake('red_right_1', redSide1, true);
+        this.bake('red_right_2', redSide0, true);
+
+        // --- PROFESSOR CARVALHO (16x16) ---
+        this.bake('prof_oak', [
+            '....MMMMMMMM....',
+            '...MMMMMMMMMM...',
+            '..MMMMMMMMMMMM..',
+            '..MFFFFFFFFFFM..',
+            '..MFFKFFFFKFFM..',
+            '...FFFFFFFFFF...',
+            '....SSSSSSSS....',
+            '..WWWWWWWWWWWW..',
+            '.WWWWWWRRWWWWWW.',
+            '.WWWWWWWWWWWWWW.',
+            '.FF.WWWWWWWW.FF.',
+            '....WWWWWWWW....',
+            '....ZZZZZZZZ....',
+            '....ZZZ..ZZZ....',
+            '...KKK....KKK...',
+            '................'
+        ]);
+
+        // --- ÁRVORE KANTO (16x16) ---
+        this.bake('tree', [
+            '....KKKKKKKK....',
+            '..KKLLLLLLLLKK..',
+            '.KLLGGGGGGGGLLK.',
+            'KLGGGGLLLLGGGGLK',
+            'KGGGGGGGGGGGGGGK',
+            'KEGGGGGGGGGGGGEK',
+            'KEEGGGGGGGGGGEEK',
+            '.KKEEEEEEEEEKK..',
+            '..KKLLLLLLLLKK..',
+            '.KLLGGGGGGGGLLK.',
+            'KGGGGGGGGGGGGGGK',
+            'KEEEEEEEEEEEEEEK',
+            '.KKKKKKKKKKKKKK.',
+            '.....KTTTTK.....',
+            '.....KTTTTK.....',
+            '....KKKKKKKK....'
+        ]);
+
+        // --- GRAMA ALTA (16x16) ---
+        this.bake('tall_grass', [
+            '................',
+            '..E..E....E..E..',
+            '.ELE.EL..ELE.EL.',
+            '.EGE.EG..EGE.EG.',
+            'EEGE.EGEEEGE.EGE',
+            'EGGE.EGGEGGE.EGG',
+            'EGGE.EGGEGGE.EGG',
+            'EEEE.EEEEEEE.EEE',
+            '..E..E....E..E..',
+            '.ELE.EL..ELE.EL.',
+            'EEGE.EGEEEGE.EGE',
+            'EGGE.EGGEGGE.EGG',
+            'EGGE.EGGEGGE.EGG',
+            'EEEE.EEEEEEE.EEE',
+            '................',
+            '................'
+        ]);
+
+        // --- PLACA DE MADEIRA (16x16) ---
+        this.bake('sign', [
+            '................',
+            '..KKKKKKKKKKKK..',
+            '.KZZZZZZZZZZZZK.',
+            '.KZKKKKKKKKKKZK.',
+            '.KZZZZZZZZZZZZK.',
+            '.KZKKKKKKKKKKZK.',
+            '.KZZZZZZZZZZZZK.',
+            '..KKKKKKKKKKKK..',
+            '......KTTK......',
+            '......KTTK......',
+            '......KTTK......',
+            '......KTTK......',
+            '.....KKKKKK.....',
+            '................',
+            '................',
+            '................'
+        ]);
+
+        // --- POKÉBOLA NO CHÃO (16x16) ---
+        this.bake('pokeball_item', [
+            '................',
+            '................',
+            '.....KKKKKK.....',
+            '...KKRRRRRRKK...',
+            '..KRRRRRRRRRRK..',
+            '..KRRRRKKRRRRK..',
+            '..KKKKKWWKKKKK..',
+            '..KWWWWKKWWWWK..',
+            '..KWWWWWWWWWWK..',
+            '...KKWWWWWWKK...',
+            '.....KKKKKK.....',
+            '................',
+            '................',
+            '................',
+            '................',
+            '................'
+        ]);
+
+        // --- SPRITES DE BATALHA: CHARMANDER (COSTAS - 32x32) ---
+        this.bake('charmander_back', [
+            '..........KKKKKKKK..............',
+            '........KKOOOOOOOOKK............',
+            '.......KOOOOOOOOOOOOK...........',
+            '......KOOOOOOOOOOOOOOK..........',
+            '.....KOOOOOOOOOOOOOOOOK.........',
+            '.....KOOOOOOOOOOOOOOOOK.........',
+            '....KOOOOOOOOOOOOOOOOOOK........',
+            '....KOOOOOOOOOOOOOOOOOOK........',
+            '....KOOOOOOOOOOOOOOOOOOK........',
+            '.....KOOOOOOOOOOOOOOOOK.........',
+            '......KKOOOOOOOOOOOOKK..........',
+            '.......KOOOOOOOOOOOOK...........',
+            '......KOOOOOOOOOOOOOOK..........',
+            '.....KOOOOOOOOOOOOOOOOOK........',
+            '....KOOOOOOOOOOOOOOOOOOOK.......',
+            '...KOOOOOOOOOOOOOOOOOOOOOK......',
+            '...KOOOKOOOOOOOOOOOOOKOOOK......',
+            '..KOOOK.KOOOOOOOOOOOK.KOOOK.....',
+            '..KKKK..KOOOOOOOOOOOK..KKKK.....',
+            '........KOOOOOOOOOOOK...........',
+            '.......KOOOOOOOOOOOOOK....KK....',
+            '.......KOOOOOOOOOOOOOK...KYYK...',
+            '......KOOOOOOOOOOOOOOOK.KYYYYK..',
+            '......KOOOOOOOOOOOOOOOKKYYRRYYK.',
+            '.....KOOOOOOOOOOOOOOOOOKYYRRYYK.',
+            '.....KOOOOOOOOOOOOOOOOOOKYYYYK..',
+            '....KOOOOOOOOOOOOOOOOOOOKKKKK...',
+            '....KOOOOOOKKKKKKKOOOOOOK.......',
+            '...KOOOOOOK.......KOOOOOOK......',
+            '...KKKKKKK.........KKKKKKK......',
+            '................................',
+            '................................'
+        ]);
+
+        // --- SPRITES DE BATALHA: RATTATA SELVAGEM (FRENTE - 28x28) ---
+        this.bake('rattata_front', [
+            '.....KKKK..........KKKK.....',
+            '....KPPPPK........KPPPPK....',
+            '...KPPCCPPK......KPPCCPPK...',
+            '...KPPCCPPKKKKKKKKPPCCPPK...',
+            '....KPPPPPPPPPPPPPPPPPPK....',
+            '....KPPPPPPPPPPPPPPPPPPK....',
+            '...KPPPPPPPPPPPPPPPPPPPPK...',
+            '...KPPPWKPPPPPPPPPPKWPPPK...',
+            '...KPPPKKPPPPPPPPPPKKPPPK...',
+            '..KPPPPPPPPPPFFPPPPPPPPPPK..',
+            '..KPPPPPPPPPFFFFPPPPPPPPPK..',
+            '...KPPPPPPPPWWWWPPPPPPPPK...',
+            '....KKPPPPPPWWWWPPPPPPKK....',
+            '..KKKKKPPPPPPPPPPPPPPKKKKK..',
+            '.......KCCCCCCCCCCCCK.......',
+            '......KCCCCCCCCCCCCCCK......',
+            '.....KPPCCCCCCCCCCCCPPK.....',
+            '.....KPPCCCCCCCCCCCCPPK.....',
+            '....KPPPCCCCCCCCCCCCPPPK....',
+            '....KPPPCCCCCCCCCCCCPPPK....',
+            '....KPPPPCCCCCCCCCCPPPPK....',
+            '.....KPPPPCCCCCCCCPPPPK.....',
+            '.....KFFFFK......KFFFFK.....',
+            '....KFFFFFK......KFFFFFK....',
+            '....KKKKKK........KKKKKK....',
+            '............................',
+            '............................',
+            '............................'
+        ]);
+
+        // --- SPRITES DE BATALHA: PIDGEY SELVAGEM (FRENTE - 28x28) ---
+        this.bake('pidgey_front', [
+            '..........KKKKKK............',
+            '........KKZZZZZZKK..........',
+            '.......KZZYYYYYYZZK.........',
+            '......KZZZZZZZZZZZZK........',
+            '.....KZZZZZZZZZZZZZZK.......',
+            '.....KZZZKKZZZZZZZZZK.......',
+            '....KZZZZWKZZZZZZZZZZK......',
+            '...KYYYYYZZZZZZZZZZZZZK.....',
+            '..KYYYYYYZZZZZZZZZZZZZZK....',
+            '...KKKKKKZZZZZZZZZZZZZZK....',
+            '.....KCCCCCCCCCCCCCCCCZK....',
+            '....KCCCCCCCCCCCCCCCCZZZK...',
+            '...KCCCCCCCCCCCCCCCCZZZZZK..',
+            '...KCCCCCCCCCCCCCCCZZZZZZK..',
+            '..KCCCCCCCCCCCCCCCCZZZZZZK..',
+            '..KCCCCCCCCCCCCCCCCZZZZZZK..',
+            '..KCCCCCCCCCCCCCCCCZZZZZK...',
+            '...KCCCCCCCCCCCCCCCZZZZK....',
+            '....KCCCCCCCCCCCCCZZZZK.....',
+            '.....KKCCCCCCCCCCKKKK.......',
+            '.......KYYYYK..KYYYYK.......',
+            '......KYYYYYK..KYYYYYK......',
+            '.....KKKKKKKK..KKKKKKKK.....',
+            '............................',
+            '............................',
+            '............................',
+            '............................',
+            '............................'
+        ]);
+    }
+}
+
+/* ============================================================================
+   3. MOTOR DO JOGO POKÉMON FIRERED (OVERWORLD + TRANSIÇÃO + BATALHA)
+   ============================================================================ */
+class FireRedGame {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.W = this.canvas.width;   // 336 (21 tiles de 16px)
+        this.H = this.canvas.height;  // 224 (14 tiles de 16px)
+        this.TILE = 16;
+
+        this.audio = new GBAudio();
+        this.sprites = new PixelSprites();
+
+        // Modos: 'OVERWORLD', 'DIALOG', 'TRANSITION', 'BATTLE'
+        this.mode = 'OVERWORLD';
+
+        // Mapa 21x14 (1 tela inteira estilo Pallet Town / Rota 1)
+        // Legenda:
+        // T = Árvore (sólido)
+        // G = Grama normal
+        // H = Grama alta (encontros)
+        // P = Caminho de terra/areia
+        // W = Água (sólido)
+        // F = Flor animada
+        // S = Placa (interativo)
+        // R = Telhado Lab/Casa (sólido)
+        // B = Parede Casa (sólido)
+        // D = Porta Casa (interativo)
+        this.mapLayout = [
+            'TTTTTTTTTTTTTTTTTTTTT',
+            'TGGGGGGGGGHHTHHHHHHHT',
+            'TGRRRRRGGGGHTHHHHHHHT',
+            'TGRRRRRGGGGHTHHHHHHHT',
+            'TGBBBBBGGGGGGGGGGGGGT',
+            'TGBBDBBPPPPPPPPGGGGGT',
+            'TGGGGGGPPPPPPPPGGGGGT',
+            'TGGFFGGPPGGGGPPGGFFGT',
+            'TGGFFGGPPGGGGPPGGGGGT',
+            'TGGGGGGPPPPPPPPGGGGGT',
+            'THHHHGGGGPPPPGGGGWWWT',
+            'THHHHGGGGPPPPGGGGWWWT',
+            'THHHHGGGGPPPPGGGGWWWT',
+            'TTTTTTTTTTTTTTTTTTTTT'
+        ];
+
+        // Jogador no grid
+        this.player = {
+            gx: 10,
+            gy: 8,
+            px: 10 * 16,
+            py: 8 * 16,
+            startX: 10 * 16,
+            startY: 8 * 16,
+            targetX: 10 * 16,
+            targetY: 8 * 16,
+            dir: 'down',
+            moving: false,
+            moveProgress: 0,
+            moveDuration: 0.16,
+            stepCount: 0,
+            bumpCooldown: 0
+        };
+
+        // NPCs e Objetos Interativos
+        this.npcs = [
+            {
+                id: 'oak',
+                gx: 10,
+                gy: 5,
+                sprite: 'prof_oak',
+                name: 'PROF. CARVALHO',
+                action: 'heal'
+            },
+            {
+                id: 'ball',
+                gx: 14,
+                gy: 5,
+                sprite: 'pokeball_item',
+                name: 'ITEM',
+                action: 'item',
+                collected: false
+            }
+        ];
+
+        // Equipe & Inventário do Jogador
+        this.partyMon = {
+            name: 'CHARMANDER',
+            level: 5,
+            hp: 20,
+            maxHp: 20,
+            attack: 12,
+            defense: 9,
+            xp: 0,
+            nextXp: 35,
+            moves: [
+                { name: 'ARRANHÃO', power: 40, type: 'NORMAL', pp: 35, maxPp: 35 },
+                { name: 'BRASA', power: 55, type: 'FOGO', pp: 25, maxPp: 25 },
+                { name: 'ROSNADO', power: 0, type: 'STATUS', pp: 40, maxPp: 40 },
+                { name: 'ATAQUE RÁPIDO', power: 45, type: 'NORMAL', pp: 30, maxPp: 30 }
+            ]
+        };
+
+        this.bag = {
+            potions: 3,
+            pokeballs: 5
+        };
+
+        // Estado de Diálogo
+        this.dialog = {
+            queue: [],
+            currentFull: '',
+            shownChars: 0,
+            charTimer: 0,
+            onComplete: null
+        };
+
+        // Transição de Batalha
+        this.transition = {
+            timer: 0,
+            duration: 1.05
+        };
+
+        // Estado da Batalha por Turnos
+        this.battle = {
+            enemy: null,
+            phase: 'INTRO', // 'INTRO', 'ACTION_MENU', 'MOVE_MENU', 'BAG_MENU', 'ANIMATING', 'END'
+            menuIndex: 0,
+            subMenuIndex: 0,
+            message: '',
+            msgTimer: 0,
+            afterMsgCallback: null,
+            playerShake: 0,
+            enemyShake: 0,
+            playerFlash: 0,
+            enemyFlash: 0,
+            pokeballAnim: null,
+            enemyCaptured: false,
+            displayPlayerHp: 20,
+            displayEnemyHp: 18
+        };
+
+        // Controles
+        this.keys = { up: false, down: false, left: false, right: false };
+        this.globalTime = 0;
+
+        this.bindInputs();
+
+        // Mensagem inicial de boas-vindas estilo FireRed
+        this.openDialog([
+            'Bem-vindo ao mundo de POKÉMON! Você está na Vila Pallet.',
+            'Fale com o PROF. CARVALHO para curar seu CHARMANDER ou entre na grama alta!'
+        ]);
+
+        this.lastTime = performance.now();
+        requestAnimationFrame((t) => this.loop(t));
+    }
+
+    /* ========================================================================
+       SISTEMA DE DIÁLOGOS (ESTILO FIRERED)
+       ======================================================================== */
+    openDialog(lines, onComplete = null) {
+        this.mode = 'DIALOG';
+        this.dialog.queue = [...lines];
+        this.dialog.onComplete = onComplete;
+        this.nextDialogLine();
+    }
+
+    nextDialogLine() {
+        if (this.dialog.queue.length === 0) {
+            this.mode = 'OVERWORLD';
+            if (this.dialog.onComplete) {
+                const cb = this.dialog.onComplete;
+                this.dialog.onComplete = null;
+                cb();
+            }
+            return;
+        }
+        this.dialog.currentFull = this.dialog.queue.shift();
+        this.dialog.shownChars = 0;
+        this.dialog.charTimer = 0;
+    }
+
+    /* ========================================================================
+       MOVIMENTAÇÃO & COLISÃO NO OVERWORLD
+       ======================================================================== */
+    isTileWalkable(gx, gy) {
+        if (gx < 0 || gy < 0 || gx >= 21 || gy >= 14) return false;
+        const tile = this.mapLayout[gy][gx];
+        if (['T', 'W', 'R', 'B', 'S'].includes(tile)) return false;
+
+        for (const npc of this.npcs) {
+            if (!npc.collected && npc.gx === gx && npc.gy === gy) return false;
+        }
+        return true;
+    }
+
+    interactFront() {
+        const p = this.player;
+        let fx = p.gx;
+        let fy = p.gy;
+        if (p.dir === 'up') fy--;
+        if (p.dir === 'down') fy++;
+        if (p.dir === 'left') fx--;
+        if (p.dir === 'right') fx++;
+
+        if (fx < 0 || fy < 0 || fx >= 21 || fy >= 14) return;
+
+        // Verifica NPCs na frente
+        for (const npc of this.npcs) {
+            if (!npc.collected && npc.gx === fx && npc.gy === fy) {
+                this.audio.confirm();
+                if (npc.action === 'heal') {
+                    this.partyMon.hp = this.partyMon.maxHp;
+                    this.partyMon.moves.forEach(m => m.pp = m.maxPp);
+                    this.audio.heal();
+                    this.openDialog([
+                        'PROF. CARVALHO: Olá, RED! Deixe-me cuidar do seu CHARMANDER...',
+                        'Pronto! Seu CHARMANDER está 100% recuperado e cheio de energia!'
+                    ]);
+                } else if (npc.action === 'item') {
+                    npc.collected = true;
+                    this.bag.pokeballs += 3;
+                    this.bag.potions += 2;
+                    this.audio.heal();
+                    this.openDialog([
+                        'RED encontrou uma mochila de suprimentos!',
+                        'Recebeu +3 POKÉBOLAS e +2 POÇÕES!'
+                    ]);
+                }
+                return;
+            }
+        }
+
+        // Verifica Tiles interativos
+        const tile = this.mapLayout[fy][fx];
+        if (tile === 'D') {
+            this.audio.confirm();
+            this.openDialog([
+                'LABORATÓRIO DO PROF. CARVALHO',
+                'A porta está trancada. O Professor está logo ali fora!'
+            ]);
+        } else if (tile === 'S') {
+            this.audio.confirm();
+            this.openDialog([
+                'PLACA DA ROTA 1: Cuidado com Pokémon selvagens na grama alta!'
+            ]);
+        }
+    }
+
+    startWildEncounter() {
+        this.mode = 'TRANSITION';
+        this.transition.timer = 0;
+        this.audio.encounter();
+
+        // Sorteia um Pokémon selvagem estilo Rota 1
+        const pool = [
+            { name: 'RATTATA', sprite: 'rattata_front', baseHp: 17, atk: 10, def: 7, catchRate: 0.65 },
+            { name: 'PIDGEY', sprite: 'pidgey_front', baseHp: 19, atk: 9, def: 8, catchRate: 0.60 }
+        ];
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const lvl = Math.max(3, this.partyMon.level - 1 + Math.floor(Math.random() * 3));
+        const maxHp = pick.baseHp + lvl * 2;
+
+        this.battle.enemy = {
+            name: pick.name,
+            sprite: pick.sprite,
+            level: lvl,
+            hp: maxHp,
+            maxHp: maxHp,
+            attack: pick.atk + Math.floor(lvl * 1.2),
+            defense: pick.def + lvl,
+            catchRate: pick.catchRate
+        };
+    }
+
+    initBattle() {
+        this.mode = 'BATTLE';
+        const b = this.battle;
+        b.phase = 'INTRO';
+        b.menuIndex = 0;
+        b.subMenuIndex = 0;
+        b.playerShake = 0;
+        b.enemyShake = 0;
+        b.playerFlash = 0;
+        b.enemyFlash = 0;
+        b.pokeballAnim = null;
+        b.enemyCaptured = false;
+        b.displayPlayerHp = this.partyMon.hp;
+        b.displayEnemyHp = b.enemy.hp;
+
+        this.setBattleMessage(`Um ${b.enemy.name} selvagem apareceu!`, () => {
+            b.phase = 'ACTION_MENU';
+            b.message = `O que ${this.partyMon.name} fará?`;
+        });
+    }
+
+    setBattleMessage(text, callback = null) {
+        this.battle.message = text;
+        this.battle.msgTimer = 1.15;
+        this.battle.afterMsgCallback = callback;
+    }
+
+    /* ========================================================================
+       LÓGICA DE TURNOS DA BATALHA
+       ======================================================================== */
+    executePlayerMove(moveIndex) {
+        const b = this.battle;
+        const playerMon = this.partyMon;
+        const enemyMon = b.enemy;
+        const move = playerMon.moves[moveIndex];
+
+        if (move.pp <= 0) {
+            this.audio.bump();
+            return;
+        }
+
+        move.pp--;
+        b.phase = 'ANIMATING';
+
+        if (move.type === 'STATUS') {
+            this.audio.confirm();
+            enemyMon.attack = Math.max(4, enemyMon.attack - 2);
+            this.setBattleMessage(`${playerMon.name} usou ${move.name}! Ataque inimigo caiu!`, () => {
+                this.executeEnemyTurn();
+            });
+            return;
+        }
+
+        // Efeito sonoro e visual do ataque
+        if (move.type === 'FOGO') {
+            this.audio.ember();
+        } else {
+            this.audio.attackHit();
+        }
+
+        b.enemyShake = 0.35;
+        b.enemyFlash = 0.35;
+
+        // Cálculo de dano clássico simplificado
+        const stab = move.type === 'FOGO' ? 1.35 : 1.0;
+        const rawDmg = (((2 * playerMon.level / 5 + 2) * move.power * (playerMon.attack / enemyMon.defense)) / 18 + 2) * stab;
+        const dmg = Math.max(2, Math.round(rawDmg * (0.9 + Math.random() * 0.2)));
+
+        enemyMon.hp = Math.max(0, enemyMon.hp - dmg);
+
+        this.setBattleMessage(`${playerMon.name} usou ${move.name}! (-${dmg} HP)`, () => {
+            if (enemyMon.hp <= 0) {
+                this.handleVictory();
+            } else {
+                this.executeEnemyTurn();
+            }
+        });
+    }
+
+    executeEnemyTurn() {
+        const b = this.battle;
+        const playerMon = this.partyMon;
+        const enemyMon = b.enemy;
+
+        const enemyMoves = enemyMon.name === 'PIDGEY' ? ['TORNADO', 'INVESTIDA'] : ['INVESTIDA', 'ATAQUE RÁPIDO'];
+        const chosenMove = enemyMoves[Math.floor(Math.random() * enemyMoves.length)];
+
+        this.audio.attackHit();
+        b.playerShake = 0.35;
+        b.playerFlash = 0.35;
+
+        const rawDmg = (((2 * enemyMon.level / 5 + 2) * 35 * (enemyMon.attack / playerMon.defense)) / 20 + 2);
+        const dmg = Math.max(1, Math.round(rawDmg * (0.85 + Math.random() * 0.25)));
+
+        playerMon.hp = Math.max(0, playerMon.hp - dmg);
+
+        this.setBattleMessage(`${enemyMon.name} inimigo usou ${chosenMove}! (-${dmg} HP)`, () => {
+            if (playerMon.hp <= 0) {
+                this.setBattleMessage(`${playerMon.name} desmaiou! Voltando ao Prof. Carvalho...`, () => {
+                    this.partyMon.hp = this.partyMon.maxHp;
+                    this.partyMon.moves.forEach(m => m.pp = m.maxPp);
+                    this.player.gx = 10;
+                    this.player.gy = 6;
+                    this.player.px = 10 * 16;
+                    this.player.py = 6 * 16;
+                    this.mode = 'OVERWORLD';
+                });
+            } else {
+                b.phase = 'ACTION_MENU';
+                b.message = `O que ${playerMon.name} fará?`;
+            }
+        });
+    }
+
+    useBagItem(itemType) {
+        const b = this.battle;
+        const playerMon = this.partyMon;
+
+        if (itemType === 'POTION') {
+            if (this.bag.potions <= 0 || playerMon.hp >= playerMon.maxHp) {
+                this.audio.bump();
+                return;
+            }
+            this.bag.potions--;
+            b.phase = 'ANIMATING';
+            this.audio.heal();
+            const healed = Math.min(playerMon.maxHp - playerMon.hp, 15);
+            playerMon.hp += healed;
+            this.setBattleMessage(`RED usou POÇÃO! Recuperou ${healed} HP!`, () => {
+                this.executeEnemyTurn();
+            });
+        } else if (itemType === 'POKEBALL') {
+            if (this.bag.pokeballs <= 0) {
+                this.audio.bump();
+                return;
+            }
+            this.bag.pokeballs--;
+            b.phase = 'ANIMATING';
+            this.audio.pokeballThrow();
+
+            // Chance de captura aumenta conforme o HP do selvagem diminui
+            const hpFactor = (3 * b.enemy.maxHp - 2 * b.enemy.hp) / (3 * b.enemy.maxHp);
+            const catchChance = Math.min(0.95, b.enemy.catchRate * hpFactor + 0.15);
+            const caught = Math.random() < catchChance;
+
+            b.pokeballAnim = {
+                timer: 0,
+                caught: caught
+            };
+
+            this.setBattleMessage(`RED arremessou uma POKÉBOLA!`, () => {
+                this.audio.pokeballWobble();
+                if (caught) {
+                    b.enemyCaptured = true;
+                    this.audio.catchSuccess();
+                    this.setBattleMessage(`Gotcha! ${b.enemy.name} foi capturado!`, () => {
+                        this.mode = 'OVERWORLD';
+                        this.openDialog([
+                            `Parabéns! ${b.enemy.name} (Nv.${b.enemy.level}) foi enviado para o PC do Prof. Carvalho!`
+                        ]);
+                    });
+                } else {
+                    b.pokeballAnim = null;
+                    this.audio.bump();
+                    this.setBattleMessage(`Ah não! O ${b.enemy.name} escapou da Pokébola!`, () => {
+                        this.executeEnemyTurn();
+                    });
+                }
+            });
+        }
+    }
+
+    handleVictory() {
+        const b = this.battle;
+        const pMon = this.partyMon;
+        const xpGain = 14 + b.enemy.level * 5;
+        pMon.xp += xpGain;
+
+        this.audio.confirm();
+        this.setBattleMessage(`${b.enemy.name} desmaiou! Ganhou ${xpGain} XP!`, () => {
+            if (pMon.xp >= pMon.nextXp) {
+                pMon.xp -= pMon.nextXp;
+                pMon.level++;
+                pMon.nextXp = Math.round(pMon.nextXp * 1.35);
+                pMon.maxHp += 4;
+                pMon.hp = pMon.maxHp;
+                pMon.attack += 2;
+                pMon.defense += 2;
+                this.audio.levelUp();
+                this.setBattleMessage(`${pMon.name} subiu para o Nível ${pMon.level}!`, () => {
+                    this.mode = 'OVERWORLD';
+                });
+            } else {
+                this.mode = 'OVERWORLD';
+            }
+        });
+    }
+
+    /* ========================================================================
+       ATUALIZAÇÃO PRINCIPAL (LOOP)
+       ======================================================================== */
+    update(dt) {
+        this.globalTime += dt;
+
+        // 1. MODO DIÁLOGO
+        if (this.mode === 'DIALOG') {
+            if (this.dialog.shownChars < this.dialog.currentFull.length) {
+                this.dialog.charTimer += dt;
+                if (this.dialog.charTimer >= 0.024) {
+                    this.dialog.charTimer = 0;
+                    this.dialog.shownChars++;
+                    if (this.dialog.shownChars % 3 === 0) {
+                        this.audio.blip();
+                    }
+                }
+            }
+            return;
+        }
+
+        // 2. MODO TRANSIÇÃO DE BATALHA
+        if (this.mode === 'TRANSITION') {
+            this.transition.timer += dt;
+            if (this.transition.timer >= this.transition.duration) {
+                this.initBattle();
+            }
+            return;
+        }
+
+        // 3. MODO BATALHA
+        if (this.mode === 'BATTLE') {
+            const b = this.battle;
+            if (b.playerShake > 0) b.playerShake -= dt;
+            if (b.enemyShake > 0) b.enemyShake -= dt;
+            if (b.playerFlash > 0) b.playerFlash -= dt;
+            if (b.enemyFlash > 0) b.enemyFlash -= dt;
+
+            // Interpolação suave das barras de HP
+            b.displayPlayerHp += (this.partyMon.hp - b.displayPlayerHp) * Math.min(1, dt * 10);
+            b.displayEnemyHp += (b.enemy.hp - b.displayEnemyHp) * Math.min(1, dt * 10);
+
+            if (b.msgTimer > 0) {
+                b.msgTimer -= dt;
+                if (b.msgTimer <= 0 && b.afterMsgCallback) {
+                    const cb = b.afterMsgCallback;
+                    b.afterMsgCallback = null;
+                    cb();
+                }
+            }
+            return;
+        }
+
+        // 4. MODO OVERWORLD (EXPLORAÇÃO EM GRID 16x16)
+        const p = this.player;
+        if (p.bumpCooldown > 0) p.bumpCooldown -= dt;
+
+        if (p.moving) {
+            p.moveProgress += dt / p.moveDuration;
+            if (p.moveProgress >= 1) {
+                p.moveProgress = 1;
+                p.px = p.targetX;
+                p.py = p.targetY;
+                p.moving = false;
+                p.stepCount++;
+
+                // Verifica se pisou na Grama Alta ('H')
+                const currentTile = this.mapLayout[p.gy][p.gx];
+                if (currentTile === 'H') {
+                    // 26% de chance de encontro selvagem por passo na grama alta
+                    if (Math.random() < 0.26) {
+                        this.startWildEncounter();
+                        return;
+                    }
+                }
+            } else {
+                p.px = p.startX + (p.targetX - p.startX) * p.moveProgress;
+                p.py = p.startY + (p.targetY - p.startY) * p.moveProgress;
+            }
+        } else {
+            // Verifica input direcional
+            let dx = 0;
+            let dy = 0;
+            let newDir = null;
+
+            if (this.keys.up) { dy = -1; newDir = 'up'; }
+            else if (this.keys.down) { dy = 1; newDir = 'down'; }
+            else if (this.keys.left) { dx = -1; newDir = 'left'; }
+            else if (this.keys.right) { dx = 1; newDir = 'right'; }
+
+            if (newDir) {
+                p.dir = newDir;
+                const nextGx = p.gx + dx;
+                const nextGy = p.gy + dy;
+
+                if (this.isTileWalkable(nextGx, nextGy)) {
+                    p.gx = nextGx;
+                    p.gy = nextGy;
+                    p.startX = p.px;
+                    p.startY = p.py;
+                    p.targetX = nextGx * this.TILE;
+                    p.targetY = nextGy * this.TILE;
+                    p.moving = true;
+                    p.moveProgress = 0;
+                } else if (p.bumpCooldown <= 0) {
+                    this.audio.bump();
+                    p.bumpCooldown = 0.28;
+                }
+            }
+        }
+    }
+
+    /* ========================================================================
+       RENDERIZAÇÃO NO CANVAS (PIXEL ART)
+       ======================================================================== */
+    draw() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.W, this.H);
+
+        if (this.mode === 'BATTLE') {
+            this.drawBattleScene(ctx);
+            return;
+        }
+
+        // Desenha o mapa do Overworld
+        this.drawOverworld(ctx);
+
+        // Desenha caixa de diálogo estilo FireRed se ativa
+        if (this.mode === 'DIALOG') {
+            this.drawFireRedDialogBox(ctx);
+        }
+
+        // Desenha animação de transição para batalha
+        if (this.mode === 'TRANSITION') {
+            this.drawEncounterTransition(ctx);
+        }
+    }
+
+    drawOverworld(ctx) {
+        const T = this.TILE;
+
+        // 1. Tiles do Terreno
+        for (let y = 0; y < 14; y++) {
+            for (let x = 0; x < 21; x++) {
+                const code = this.mapLayout[y][x];
+                const px = x * T;
+                const py = y * T;
+
+                // Base de grama verde FireRed
+                ctx.fillStyle = '#58c850';
+                ctx.fillRect(px, py, T, T);
+
+                // Detalhe sutil de textura na grama
+                ctx.fillStyle = '#48b848';
+                ctx.fillRect(px + 2, py + 3, 2, 2);
+                ctx.fillRect(px + 10, py + 11, 2, 2);
+
+                if (code === 'T') {
+                    ctx.drawImage(this.sprites.cache.tree, px, py);
+                } else if (code === 'H') {
+                    ctx.drawImage(this.sprites.cache.tall_grass, px, py);
+                } else if (code === 'P') {
+                    // Caminho de terra claro estilo Pallet Town
+                    ctx.fillStyle = '#e8d098';
+                    ctx.fillRect(px, py, T, T);
+                    ctx.fillStyle = '#d0b078';
+                    ctx.fillRect(px + 3, py + 4, 2, 2);
+                    ctx.fillRect(px + 11, py + 12, 2, 2);
+                } else if (code === 'W') {
+                    // Água azul animada
+                    ctx.fillStyle = '#3890f8';
+                    ctx.fillRect(px, py, T, T);
+                    const waveShift = Math.floor(this.globalTime * 3) % 4;
+                    ctx.fillStyle = '#88d0ff';
+                    ctx.fillRect(px + 2 + waveShift, py + 4, 6, 1);
+                    ctx.fillRect(px + 5 - waveShift, py + 11, 6, 1);
+                } else if (code === 'F') {
+                    // Flores vermelhas e amarelas animadas
+                    const bloom = Math.floor(this.globalTime * 4) % 2 === 0;
+                    ctx.fillStyle = bloom ? '#f83838' : '#f8d030';
+                    ctx.fillRect(px + 3, py + 3, 4, 4);
+                    ctx.fillRect(px + 9, py + 9, 4, 4);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(px + 4, py + 4, 2, 2);
+                    ctx.fillRect(px + 10, py + 10, 2, 2);
+                } else if (code === 'S') {
+                    ctx.drawImage(this.sprites.cache.sign, px, py);
+                } else if (code === 'R') {
+                    // Telhado vermelho do Laboratório
+                    ctx.fillStyle = '#d83838';
+                    ctx.fillRect(px, py, T, T);
+                    ctx.fillStyle = '#a02020';
+                    ctx.fillRect(px, py + 12, T, 4);
+                    ctx.fillStyle = '#f86868';
+                    ctx.fillRect(px, py + 2, T, 2);
+                } else if (code === 'B') {
+                    // Parede creme da casa
+                    ctx.fillStyle = '#f8e8c0';
+                    ctx.fillRect(px, py, T, T);
+                    ctx.fillStyle = '#b8a078';
+                    ctx.fillRect(px, py + 14, T, 2);
+                    // Janela azul
+                    ctx.fillStyle = '#48a8f8';
+                    ctx.fillRect(px + 4, py + 4, 8, 7);
+                    ctx.strokeStyle = '#382820';
+                    ctx.strokeRect(px + 4.5, py + 4.5, 7, 6);
+                } else if (code === 'D') {
+                    // Porta do Laboratório
+                    ctx.fillStyle = '#f8e8c0';
+                    ctx.fillRect(px, py, T, T);
+                    ctx.fillStyle = '#784828';
+                    ctx.fillRect(px + 3, py + 3, 10, 13);
+                    ctx.fillStyle = '#f8d030';
+                    ctx.fillRect(px + 10, py + 9, 2, 2);
+                }
+            }
+        }
+
+        // 2. NPCs e Itens
+        for (const npc of this.npcs) {
+            if (npc.collected) continue;
+            const spr = this.sprites.cache[npc.sprite];
+            if (spr) {
+                ctx.drawImage(spr, npc.gx * T, npc.gy * T);
+            }
+        }
+
+        // 3. Protagonista RED
+        const p = this.player;
+        let frameIdx = 0;
+        if (p.moving) {
+            frameIdx = p.moveProgress < 0.5 ? (p.stepCount % 2 === 0 ? 1 : 2) : 0;
+        }
+        const sprKey = `red_${p.dir}_${frameIdx}`;
+        const playerSpr = this.sprites.cache[sprKey] || this.sprites.cache.red_down_0;
+        ctx.drawImage(playerSpr, Math.round(p.px), Math.round(p.py));
+
+        // Efeito de folhas quando caminha dentro da grama alta
+        if (this.mapLayout[p.gy][p.gx] === 'H') {
+            ctx.fillStyle = '#207830';
+            ctx.fillRect(Math.round(p.px) + 1, Math.round(p.py) + 12, 14, 4);
+        }
+    }
+
+    drawFireRedDialogBox(ctx) {
+        const bx = 8;
+        const by = this.H - 62;
+        const bw = this.W - 16;
+        const bh = 54;
+
+        // Caixa branca com borda dupla vermelha/azul estilo FireRed
+        ctx.fillStyle = '#f8f8f8';
+        ctx.fillRect(bx, by, bw, bh);
+
+        ctx.strokeStyle = '#283048';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+
+        ctx.strokeStyle = '#d83838';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx + 3, by + 3, bw - 6, bh - 6);
+
+        // Texto com quebra de linha automática
+        const visibleText = this.dialog.currentFull.slice(0, this.dialog.shownChars);
+        ctx.fillStyle = '#202028';
+        ctx.font = '8px "Press Start 2P", monospace';
+        this.drawWrappedText(ctx, visibleText, bx + 12, by + 18, bw - 24, 13);
+
+        // Triângulo vermelho piscante indicando próximo texto
+        if (this.dialog.shownChars >= this.dialog.currentFull.length) {
+            if (Math.floor(this.globalTime * 4) % 2 === 0) {
+                ctx.fillStyle = '#e83030';
+                ctx.fillRect(bx + bw - 18, by + bh - 12, 6, 4);
+                ctx.fillRect(bx + bw - 16, by + bh - 8, 2, 2);
+            }
+        }
+    }
+
+    drawEncounterTransition(ctx) {
+        const t = this.transition.timer / this.transition.duration;
+        if (t < 0.45) {
+            // Piscadas rápidas estilo GBA
+            if (Math.floor(t * 24) % 2 === 0) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, this.W, this.H);
+            }
+        } else {
+            // Cortina preta fechando horizontalmente
+            const progress = (t - 0.45) / 0.55;
+            const halfH = Math.ceil((this.H / 2) * progress);
+            ctx.fillStyle = '#101018';
+            ctx.fillRect(0, 0, this.W, halfH);
+            ctx.fillRect(0, this.H - halfH, this.W, halfH);
+        }
+    }
+
+    /* ========================================================================
+       RENDERIZAÇÃO DA CENA DE BATALHA (ESTILO POKÉMON FIRERED)
+       ======================================================================== */
+    drawBattleScene(ctx) {
+        const b = this.battle;
+        const pMon = this.partyMon;
+        const eMon = b.enemy;
+
+        // 1. Fundo de Batalha (Céu azul claro + campo verde)
+        ctx.fillStyle = '#b8e8f8';
+        ctx.fillRect(0, 0, this.W, 95);
+        ctx.fillStyle = '#d8f4ff';
+        ctx.fillRect(0, 75, this.W, 20);
+
+        ctx.fillStyle = '#88d870';
+        ctx.fillRect(0, 95, this.W, 75);
+        ctx.fillStyle = '#68b850';
+        ctx.fillRect(0, 95, this.W, 6);
+
+        // 2. Plataformas Ovais de Grama
+        // Plataforma Inimiga (Superior Direita)
+        ctx.fillStyle = '#509840';
+        ctx.beginPath();
+        ctx.ellipse(248, 86, 56, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#a8e888';
+        ctx.beginPath();
+        ctx.ellipse(248, 84, 50, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Plataforma do Jogador (Inferior Esquerda)
+        ctx.fillStyle = '#509840';
+        ctx.beginPath();
+        ctx.ellipse(84, 154, 72, 18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#a8e888';
+        ctx.beginPath();
+        ctx.ellipse(84, 152, 64, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Sprite do Inimigo (Frente - ampliado 2x = 56x56)
+        if (!b.enemyCaptured) {
+            const enemyBlink = b.enemyFlash > 0 && Math.floor(b.enemyFlash * 25) % 2 === 0;
+            if (!enemyBlink) {
+                const exOffset = b.enemyShake > 0 ? Math.round((Math.random() - 0.5) * 6) : 0;
+                const eSpr = this.sprites.cache[eMon.sprite];
+                if (eSpr) {
+                    ctx.drawImage(eSpr, 220 + exOffset, 32, 56, 56);
+                }
+            }
+        } else {
+            // Pokébola capturada no lugar do inimigo
+            ctx.drawImage(this.sprites.cache.pokeball_item, 236, 60, 24, 24);
+        }
+
+        // 4. Sprite do Jogador (Charmander de costas - ampliado 2x = 64x64)
+        const playerBlink = b.playerFlash > 0 && Math.floor(b.playerFlash * 25) % 2 === 0;
+        if (!playerBlink) {
+            const pxOffset = b.playerShake > 0 ? Math.round((Math.random() - 0.5) * 6) : 0;
+            const pSpr = this.sprites.cache.charmander_back;
+            if (pSpr) {
+                ctx.drawImage(pSpr, 50 + pxOffset, 94, 64, 64);
+            }
+        }
+
+        // 5. Caixa de Status do Inimigo (Superior Esquerda)
+        this.drawStatusBox(ctx, 10, 12, 146, 36, eMon.name, eMon.level, b.displayEnemyHp, eMon.maxHp, false);
+
+        // 6. Caixa de Status do Jogador (Inferior Direita)
+        this.drawStatusBox(ctx, 174, 108, 152, 46, pMon.name, pMon.level, b.displayPlayerHp, pMon.maxHp, true);
+
+        // 7. Painel Inferior de Batalha (Mensagens e Menus estilo FireRed)
+        const panelY = 160;
+        const panelH = 64;
+
+        ctx.fillStyle = '#283038';
+        ctx.fillRect(0, panelY, this.W, panelH);
+
+        // Caixa de Texto Esquerda
+        ctx.fillStyle = '#f8f8f8';
+        ctx.fillRect(4, panelY + 4, this.W - 8, panelH - 8);
+        ctx.strokeStyle = '#d83838';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(5, panelY + 5, this.W - 10, panelH - 10);
+
+        if (b.phase === 'ACTION_MENU') {
+            // Texto à esquerda + Caixa de 4 opções à direita
+            ctx.fillStyle = '#202028';
+            ctx.font = '8px "Press Start 2P", monospace';
+            this.drawWrappedText(ctx, b.message, 12, panelY + 22, 165, 13);
+
+            const menuX = 182;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(menuX, panelY + 4, this.W - menuX - 4, panelH - 8);
+            ctx.strokeStyle = '#304878';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(menuX + 1, panelY + 5, this.W - menuX - 6, panelH - 10);
+
+            const options = ['LUTAR', 'MOCHILA', 'POKÉMON', 'FUGIR'];
+            for (let i = 0; i < 4; i++) {
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                const ox = menuX + 14 + col * 72;
+                const oy = panelY + 23 + row * 22;
+
+                ctx.fillStyle = '#202028';
+                ctx.font = '7px "Press Start 2P", monospace';
+                ctx.fillText(options[i], ox, oy);
+
+                if (b.menuIndex === i) {
+                    ctx.fillStyle = '#e83030';
+                    ctx.fillText('▶', ox - 9, oy);
+                }
+            }
+        } else if (b.phase === 'MOVE_MENU') {
+            // Menu de 4 Golpes + PP/Tipo
+            const splitX = 226;
+            ctx.strokeStyle = '#304878';
+            ctx.beginPath();
+            ctx.moveTo(splitX, panelY + 4);
+            ctx.lineTo(splitX, panelY + panelH - 4);
+            ctx.stroke();
+
+            for (let i = 0; i < 4; i++) {
+                const mv = pMon.moves[i];
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                const mx = 16 + col * 106;
+                const my = panelY + 23 + row * 22;
+
+                ctx.fillStyle = mv.pp > 0 ? '#202028' : '#999999';
+                ctx.font = '6.5px "Press Start 2P", monospace';
+                ctx.fillText(mv.name, mx, my);
+
+                if (b.subMenuIndex === i) {
+                    ctx.fillStyle = '#e83030';
+                    ctx.fillText('▶', mx - 9, my);
+                }
+            }
+
+            // Info do golpe selecionado
+            const selMove = pMon.moves[b.subMenuIndex];
+            ctx.fillStyle = '#202028';
+            ctx.font = '6.5px "Press Start 2P", monospace';
+            ctx.fillText(`PP ${selMove.pp}/${selMove.maxPp}`, splitX + 8, panelY + 23);
+            ctx.fillStyle = selMove.type === 'FOGO' ? '#d83838' : '#585868';
+            ctx.fillText(selMove.type, splitX + 8, panelY + 44);
+        } else if (b.phase === 'BAG_MENU') {
+            const bagItems = [
+                { label: `POÇÃO x${this.bag.potions}`, desc: 'Cura 15 HP' },
+                { label: `POKÉBOLA x${this.bag.pokeballs}`, desc: 'Captura selvagem' },
+                { label: 'VOLTAR', desc: 'Fechar mochila' }
+            ];
+            for (let i = 0; i < bagItems.length; i++) {
+                const iy = panelY + 19 + i * 16;
+                ctx.fillStyle = '#202028';
+                ctx.font = '7px "Press Start 2P", monospace';
+                ctx.fillText(bagItems[i].label, 22, iy);
+
+                if (b.subMenuIndex === i) {
+                    ctx.fillStyle = '#e83030';
+                    ctx.fillText('▶', 12, iy);
+                    ctx.fillStyle = '#585870';
+                    ctx.fillText(bagItems[i].desc, 178, panelY + 32);
+                }
+            }
+        } else {
+            // Mensagem de ação / turno
+            ctx.fillStyle = '#202028';
+            ctx.font = '8px "Press Start 2P", monospace';
+            this.drawWrappedText(ctx, b.message, 14, panelY + 24, this.W - 28, 14);
+        }
+    }
+
+    drawStatusBox(ctx, x, y, w, h, name, level, currentHp, maxHp, isPlayer) {
+        // Caixa creme estilo FireRed HUD
+        ctx.fillStyle = '#f8f4d8';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = '#383848';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, w, h);
+
+        // Nome e Nível
+        ctx.fillStyle = '#202028';
+        ctx.font = '7px "Press Start 2P", monospace';
+        ctx.fillText(name, x + 8, y + 13);
+        ctx.fillText(`Nv${level}`, x + w - 36, y + 13);
+
+        // Barra de HP
+        const barX = x + 32;
+        const barY = y + 20;
+        const barW = w - 42;
+        const barH = 6;
+
+        ctx.fillStyle = '#d86828';
+        ctx.font = '6px "Press Start 2P", monospace';
+        ctx.fillText('HP', x + 12, barY + 6);
+
+        ctx.fillStyle = '#383848';
+        ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+
+        const ratio = Math.max(0, Math.min(1, currentHp / maxHp));
+        ctx.fillStyle = ratio > 0.5 ? '#48d868' : (ratio > 0.22 ? '#f8c830' : '#f84038');
+        ctx.fillRect(barX, barY, Math.round(barW * ratio), barH);
+
+        if (isPlayer) {
+            // Números de HP e barra azul de XP
+            ctx.fillStyle = '#202028';
+            ctx.font = '7px "Press Start 2P", monospace';
+            ctx.fillText(`${Math.ceil(currentHp)}/${maxHp}`, x + w - 54, y + 37);
+
+            const xpRatio = Math.min(1, this.partyMon.xp / this.partyMon.nextXp);
+            ctx.fillStyle = '#383848';
+            ctx.fillRect(x + 28, y + 40, w - 36, 3);
+            ctx.fillStyle = '#38a8f8';
+            ctx.fillRect(x + 28, y + 40, Math.round((w - 36) * xpRatio), 3);
+        }
+    }
+
+    drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' ');
+        let line = '';
+        let curY = y;
+
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && n > 0) {
+                ctx.fillText(line.trim(), x, curY);
+                line = words[n] + ' ';
+                curY += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line.trim(), x, curY);
+    }
+
+    /* ========================================================================
+       GERENCIAMENTO DE INPUTS (BOTÃO A, BOTÃO B, D-PAD)
+       ======================================================================== */
+    pressA() {
+        this.audio.init();
+
+        if (this.mode === 'DIALOG') {
+            if (this.dialog.shownChars < this.dialog.currentFull.length) {
+                this.dialog.shownChars = this.dialog.currentFull.length;
+            } else {
+                this.audio.confirm();
+                this.nextDialogLine();
+            }
+            return;
+        }
+
+        if (this.mode === 'OVERWORLD' && !this.player.moving) {
+            this.interactFront();
+            return;
+        }
+
+        if (this.mode === 'BATTLE') {
+            const b = this.battle;
+            if (b.phase === 'ACTION_MENU') {
+                this.audio.confirm();
+                if (b.menuIndex === 0) {
+                    b.phase = 'MOVE_MENU';
+                    b.subMenuIndex = 0;
+                } else if (b.menuIndex === 1) {
+                    b.phase = 'BAG_MENU';
+                    b.subMenuIndex = 0;
+                } else if (b.menuIndex === 2) {
+                    b.phase = 'ANIMATING';
+                    this.setBattleMessage(`${this.partyMon.name} (Nv.${this.partyMon.level}) está pronto para lutar!`, () => {
+                        b.phase = 'ACTION_MENU';
+                        b.message = `O que ${this.partyMon.name} fará?`;
+                    });
+                } else if (b.menuIndex === 3) {
+                    b.phase = 'ANIMATING';
+                    this.setBattleMessage('Escapou com segurança!', () => {
+                        this.mode = 'OVERWORLD';
+                    });
+                }
+            } else if (b.phase === 'MOVE_MENU') {
+                this.executePlayerMove(b.subMenuIndex);
+            } else if (b.phase === 'BAG_MENU') {
+                if (b.subMenuIndex === 0) this.useBagItem('POTION');
+                else if (b.subMenuIndex === 1) this.useBagItem('POKEBALL');
+                else {
+                    this.audio.confirm();
+                    b.phase = 'ACTION_MENU';
+                }
+            }
+        }
+    }
+
+    pressB() {
+        this.audio.init();
+        if (this.mode === 'DIALOG') {
+            this.pressA();
+            return;
+        }
+        if (this.mode === 'BATTLE') {
+            const b = this.battle;
+            if (b.phase === 'MOVE_MENU' || b.phase === 'BAG_MENU') {
+                this.audio.confirm();
+                b.phase = 'ACTION_MENU';
+            }
+        }
+    }
+
+    navigateBattleMenu(dir) {
+        if (this.mode !== 'BATTLE') return;
+        const b = this.battle;
+
+        if (b.phase === 'ACTION_MENU' || b.phase === 'MOVE_MENU') {
+            const key = b.phase === 'ACTION_MENU' ? 'menuIndex' : 'subMenuIndex';
+            let idx = b[key];
+            if (dir === 'left' || dir === 'right') idx ^= 1;
+            if (dir === 'up' || dir === 'down') idx ^= 2;
+            if (idx !== b[key]) {
+                b[key] = idx;
+                this.audio.blip();
+            }
+        } else if (b.phase === 'BAG_MENU') {
+            if (dir === 'up') {
+                b.subMenuIndex = (b.subMenuIndex + 2) % 3;
+                this.audio.blip();
+            } else if (dir === 'down') {
+                b.subMenuIndex = (b.subMenuIndex + 1) % 3;
+                this.audio.blip();
+            }
+        }
+    }
+
+    bindInputs() {
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'KeyW'].includes(e.code)) {
+                e.preventDefault();
+                if (!this.keys.up) this.navigateBattleMenu('up');
+                this.keys.up = true;
+            }
+            if (['ArrowDown', 'KeyS'].includes(e.code)) {
+                e.preventDefault();
+                if (!this.keys.down) this.navigateBattleMenu('down');
+                this.keys.down = true;
+            }
+            if (['ArrowLeft', 'KeyA'].includes(e.code)) {
+                e.preventDefault();
+                if (!this.keys.left) this.navigateBattleMenu('left');
+                this.keys.left = true;
+            }
+            if (['ArrowRight', 'KeyD'].includes(e.code)) {
+                e.preventDefault();
+                if (!this.keys.right) this.navigateBattleMenu('right');
+                this.keys.right = true;
+            }
+            if (['KeyZ', 'Enter', 'Space'].includes(e.code)) {
+                e.preventDefault();
+                this.pressA();
+            }
+            if (['KeyX', 'Escape', 'Backspace'].includes(e.code)) {
+                e.preventDefault();
+                this.pressB();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (['ArrowUp', 'KeyW'].includes(e.code)) this.keys.up = false;
+            if (['ArrowDown', 'KeyS'].includes(e.code)) this.keys.down = false;
+            if (['ArrowLeft', 'KeyA'].includes(e.code)) this.keys.left = false;
+            if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = false;
+        });
+
+        // Controles Virtuais GBA (Mouse & Touch)
+        const bindDirBtn = (id, dir) => {
+            const el = document.getElementById(id);
+            const down = (e) => {
+                e.preventDefault();
+                this.audio.init();
+                if (!this.keys[dir]) this.navigateBattleMenu(dir);
+                this.keys[dir] = true;
+                el.classList.add('active');
+            };
+            const up = (e) => {
+                e.preventDefault();
+                this.keys[dir] = false;
+                el.classList.remove('active');
+            };
+            el.addEventListener('mousedown', down);
+            el.addEventListener('mouseup', up);
+            el.addEventListener('mouseleave', up);
+            el.addEventListener('touchstart', down, { passive: false });
+            el.addEventListener('touchend', up, { passive: false });
+            el.addEventListener('touchcancel', up, { passive: false });
+        };
+
+        bindDirBtn('btn-up', 'up');
+        bindDirBtn('btn-down', 'down');
+        bindDirBtn('btn-left', 'left');
+        bindDirBtn('btn-right', 'right');
+
+        const bindActionBtn = (id, fn) => {
+            const el = document.getElementById(id);
+            const press = (e) => {
+                e.preventDefault();
+                el.classList.add('active');
+                fn();
+            };
+            const release = (e) => {
+                e.preventDefault();
+                el.classList.remove('active');
+            };
+            el.addEventListener('mousedown', press);
+            el.addEventListener('mouseup', release);
+            el.addEventListener('mouseleave', release);
+            el.addEventListener('touchstart', press, { passive: false });
+            el.addEventListener('touchend', release, { passive: false });
+        };
+
+        bindActionBtn('btn-a', () => this.pressA());
+        bindActionBtn('btn-b', () => this.pressB());
+
+        const soundBtn = document.getElementById('btn-sound');
+        soundBtn.addEventListener('click', () => {
+            const muted = this.audio.toggleMute();
+            soundBtn.textContent = muted ? 'SOM: OFF' : 'SOM: ON';
+        });
+    }
+
+    loop(now) {
+        const dt = Math.min((now - this.lastTime) / 1000, 0.05);
+        this.lastTime = now;
+
+        this.update(dt);
+        this.draw();
+
+        requestAnimationFrame((t) => this.loop(t));
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    window.rpg = new FireRedGame();
+});
+</script>
+</body>
+</html>
