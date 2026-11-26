@@ -613,12 +613,12 @@
       grid: [
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1],
         [1,2,2,0,2,8,5,8,5,8,2,0,2,2,1],
-        [1,2,0,0,0,0,6,6,6,0,0,0,0,2,1],
-        [1,2,0,0,0,0,6,6,6,0,0,0,0,2,1],
-        [1,7,0,0,0,0,6,6,6,0,0,0,0,7,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
+        [1,2,0,0,0,6,6,6,6,6,0,0,0,2,1],
+        [1,2,0,0,6,6,6,6,6,6,6,0,0,2,1],
+        [1,0,0,0,6,6,6,6,6,6,6,0,0,0,1],
+        [1,2,0,0,0,6,6,6,6,6,0,0,0,2,1],
+        [1,2,0,0,0,0,6,6,6,0,0,0,0,2,1],
         [1,2,2,0,2,8,8,0,8,8,2,0,2,2,1],
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1]
       ],
@@ -635,9 +635,7 @@
         { x: 11, y: 9, to: 'redes', tx: 7, ty: 8, dir: 'up' }
       ],
       entities: [
-        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 3, char: 'lucas' },
-        { id: 'swing1', type: 'swing', name: 'Balanço da Praça', x: 1, y: 4, text: 'Você sentou no balanço para descansar e apreciar a EEEP Jaime Alencar!' },
-        { id: 'swing2', type: 'swing', name: 'Balanço da Praça', x: 13, y: 4, text: 'Você sentou no balanço e sente a brisa fresca da escola!' },
+        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 5, char: 'lucas' },
         { id: 'sign1', type: 'sign', x: 6, y: 1, text: 'EEEP JAIME ALENCAR DE OLIVEIRA — Curso Técnico em Desenvolvimento de Sistemas. Explore as 4 áreas!' },
         { id: 'sign2', type: 'sign', x: 8, y: 1, text: 'Norte-Oeste: Desenvolvimento | Norte-Leste: Manutenção | Sul-Oeste: Administração | Sul-Leste: Redes.' }
       ]
@@ -2164,8 +2162,16 @@
 
     // Fundo base (chão)
     if (theme === 'courtyard') {
-      ctx.fillStyle = (c + r) % 2 === 0 ? '#e5e7eb' : '#dbe2ea';
+      // Chão de madeira rústica e aconchegante para substituir o tom branco
+      ctx.fillStyle = (c + r) % 2 === 0 ? '#b45309' : '#92400e';
       ctx.fillRect(x, y, TILE, TILE);
+      // Linhas da tábua de madeira
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x, y + TILE - 4, TILE, 4);
+      if (c % 2 === 0) {
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        ctx.fillRect(x + TILE / 2 - 1, y, 2, TILE - 4);
+      }
     } else if (theme === 'dev') {
       ctx.fillStyle = (c + r) % 2 === 0 ? '#dbeafe' : '#cfe2ff';
       ctx.fillRect(x, y, TILE, TILE);
@@ -2234,13 +2240,19 @@
       ctx.fillStyle = '#fde047';
       ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
     } else if (tile === 6) {
-      // Tapete central do Pátio (Azul e Amarelo estilo Jaime Alencar)
-      ctx.fillStyle = '#1d4ed8';
-      ctx.fillRect(x, y, TILE, TILE);
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
-      ctx.fillStyle = '#1e3a8a';
-      ctx.fillRect(x + 10, y + 10, TILE - 20, TILE - 20);
+      // Tapete circular em tons de marrom elegante
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath();
+      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 5, 0, Math.PI * 2);
+      ctx.fill();
     } else if (tile === 7) {
       // Balanço (Assento de madeira com cordas)
       ctx.fillStyle = '#e2e8f0';
