@@ -140,6 +140,24 @@ body {
 .hud-btn:hover { background: #475569; }
 .hud-btn:active { transform: scale(0.95); }
 
+.save-toast {
+  display: inline-block;
+  background: #15803d;
+  color: #fff;
+  border: 1px solid #4ade80;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 8px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: all 0.25s ease;
+  pointer-events: none;
+}
+.save-toast.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Moldura Preta da Tela GBA */
 .screen-bezel {
   background: #111827;
@@ -182,7 +200,7 @@ canvas#gameCanvas {
 
 /* =========================================
    TELA INICIAL (TITLE SCREEN FIRERED)
-   ========================================= */
+========================================= */
 .overlay-screen {
   position: absolute;
   inset: 0;
@@ -299,7 +317,7 @@ canvas#gameCanvas {
 
 /* =========================================
    CAIXA DE DIÁLOGO CLÁSSICA FIRERED
-   ========================================= */
+========================================= */
 #dialogueOverlay {
   position: absolute;
   inset: 0;
@@ -383,7 +401,7 @@ canvas#gameCanvas {
 
 /* =========================================
    TELA DE MINI-JOGOS
-   ========================================= */
+========================================= */
 #minigameOverlay {
   background: #0f172a;
   padding: 10px;
@@ -531,7 +549,7 @@ canvas#gameCanvas {
 
 /* =========================================
    TELA DE BATALHA ESTILO POKÉMON FIRERED
-   ========================================= */
+========================================= */
 #battleOverlay {
   background: #f8f8f0;
   color: #0f172a;
@@ -634,7 +652,7 @@ canvas#gameCanvas {
   text-align: right;
   font-size: 8px;
   margin-top: 3px;
-  color: #334058;
+  color: #334155;
 }
 
 .sprite-stage {
@@ -659,7 +677,9 @@ canvas#gameCanvas {
   transition: transform 0.15s ease;
 }
 
-.shake-hit { animation: shakeAnim 0.35s ease; }
+.shake-hit {
+  animation: shakeAnim 0.35s ease;
+}
 @keyframes shakeAnim {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-8px); filter: brightness(2); }
@@ -759,9 +779,20 @@ canvas#gameCanvas {
   text-align: left;
   transition: all 0.1s;
 }
-.move-btn:hover:not(:disabled) { background: #fef9c3; border-color: #ca8a04; transform: translateY(-1px); }
-.move-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.move-btn.corrupted { background: #450a0a; color: #fca5a5; border-color: #ef4444; }
+.move-btn:hover:not(:disabled) {
+  background: #fef9c3;
+  border-color: #ca8a04;
+  transform: translateY(-1px);
+}
+.move-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.move-btn.corrupted {
+  background: #450a0a;
+  color: #fca5a5;
+  border-color: #ef4444;
+}
 
 .move-name {
   font-family: var(--font-pixel);
@@ -781,7 +812,7 @@ canvas#gameCanvas {
 
 /* =========================================
    CONTRATO INTERATIVO FINAL & HALL DA FAMA
-   ========================================= */
+========================================= */
 #contractOverlay {
   background: #1e293b;
   padding: 10px;
@@ -896,7 +927,7 @@ canvas#signatureCanvas {
 
 /* =========================================
    CONTROLES ESTILO GAME BOY ADVANCE
-   ========================================= */
+========================================= */
 .gba-controls {
   display: flex;
   align-items: center;
@@ -1008,7 +1039,10 @@ canvas#signatureCanvas {
 }
 
 @media (max-width: 560px) {
-  .dpad { grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); }
+  .dpad {
+    grid-template-columns: repeat(3, 38px);
+    grid-template-rows: repeat(3, 38px);
+  }
   .round-btn { width: 48px; height: 48px; font-size: 12px; }
   .battle-bottom-panel { grid-template-columns: 1fr; }
   .hp-card { width: 58%; }

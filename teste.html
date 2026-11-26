@@ -8,1039 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --gba-shell: #b91c1c;
-      --gba-shell-dark: #7f1d1d;
-      --gba-shell-light: #ef4444;
-      --screen-bg: #111827;
-      --fr-blue: #2850a8;
-      --fr-blue-light: #5888e8;
-      --fr-cream: #f8f8f0;
-      --fr-border: #384058;
-      --hp-green: #22c55e;
-      --hp-yellow: #eab308;
-      --hp-red: #ef4444;
-      --font-pixel: 'Press Start 2P', monospace;
-      --font-retro: 'VT323', monospace;
-    }
-
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      padding: 8px;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
-      color: #f8fafc;
-      font-family: var(--font-pixel);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-    }
-
-    /* Moldura estilo Game Boy Advance SP / FireRed */
-    .console-wrapper {
-      width: 100%;
-      max-width: 780px;
-      background: linear-gradient(145deg, var(--gba-shell-light), var(--gba-shell) 35%, var(--gba-shell-dark));
-      border-radius: 22px;
-      padding: 12px 14px 16px;
-      box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.7),
-        inset 0 2px 4px rgba(255, 255, 255, 0.35),
-        inset 0 -4px 8px rgba(0, 0, 0, 0.45);
-      border: 3px solid #450a0a;
-    }
-
-    /* HUD Superior */
-    .hud-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background: #0f172a;
-      border: 3px solid #334155;
-      border-radius: 12px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-    }
-
-    .hud-location {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 180px;
-      flex: 1;
-    }
-
-    .hud-area-name {
-      font-size: 10px;
-      color: #fde047;
-      text-shadow: 1px 1px 0 #000;
-    }
-
-    .hud-objective {
-      font-family: var(--font-retro);
-      font-size: 17px;
-      color: #cbd5e1;
-      line-height: 1.1;
-    }
-
-    .hud-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .badges-tray {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #1e293b;
-      padding: 4px 8px;
-      border-radius: 8px;
-      border: 2px solid #475569;
-    }
-
-    .badge-slot {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      background: #0f172a;
-      border: 2px solid #334155;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      filter: grayscale(100%) opacity(0.35);
-      transition: all 0.35s ease;
-      position: relative;
-      cursor: help;
-    }
-
-    .badge-slot.earned {
-      filter: none;
-      border-color: #facc15;
-      background: radial-gradient(circle, #fef08a 0%, #ca8a04 100%);
-      box-shadow: 0 0 10px rgba(250, 204, 21, 0.7);
-      transform: scale(1.08);
-    }
-
-    .hud-btn {
-      background: #334155;
-      color: #f8fafc;
-      border: 2px solid #64748b;
-      border-radius: 8px;
-      padding: 6px 8px;
-      font-family: var(--font-pixel);
-      font-size: 9px;
-      cursor: pointer;
-      transition: transform 0.1s, background 0.2s;
-    }
-
-    .hud-btn:hover { background: #475569; }
-    .hud-btn:active { transform: scale(0.95); }
-
-    /* Moldura Preta da Tela GBA */
-    .screen-bezel {
-      background: #111827;
-      border-radius: 14px;
-      padding: 10px;
-      border: 4px solid #1f2937;
-      box-shadow: inset 0 0 18px #000;
-      position: relative;
-    }
-
-    .screen-viewport {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 3 / 2;
-      background: #000;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid #374151;
-    }
-
-    canvas#gameCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-    }
-
-    /* Transição de fade entre mapas */
-    .fade-overlay {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease;
-      z-index: 40;
-    }
-    .fade-overlay.active { opacity: 1; }
-
-    /* =========================================
-       TELA INICIAL (TITLE SCREEN FIRERED)
-    ========================================= */
-    .overlay-screen {
-      position: absolute;
-      inset: 0;
-      z-index: 30;
-      display: none;
-      flex-direction: column;
-    }
-    .overlay-screen.active { display: flex; }
-
-    #titleScreen {
-      background: linear-gradient(180deg, #991b1b 0%, #dc2626 40%, #f97316 75%, #1e1b4b 100%);
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 16px;
-      text-align: center;
-    }
-
-    .title-badge {
-      background: rgba(15, 23, 42, 0.75);
-      border: 2px solid #fde047;
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 8px;
-      color: #fde047;
-      letter-spacing: 1px;
-    }
-
-    .title-logo {
-      margin: 6px 0;
-    }
-
-    .title-logo h1 {
-      margin: 0;
-      font-size: clamp(16px, 3.6vw, 28px);
-      color: #fef08a;
-      text-shadow: 3px 3px 0 #7f1d1d, -2px -2px 0 #1e3a8a, 0 0 18px rgba(254, 240, 138, 0.6);
-      line-height: 1.3;
-    }
-
-    .title-logo p {
-      margin: 8px 0 0;
-      font-family: var(--font-retro);
-      font-size: clamp(16px, 2.8vw, 22px);
-      color: #fff;
-      text-shadow: 2px 2px 0 #000;
-    }
-
-    .title-chars {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin: 4px 0;
-    }
-
-    .title-char-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 10px;
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .title-char-card span {
-      font-size: 8px;
-      color: #e2e8f0;
-    }
-
-    .btn-pixel {
-      background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
-      color: #1e293b;
-      border: 3px solid #fff;
-      box-shadow: 0 4px 0 #854d0e, 0 8px 16px rgba(0,0,0,0.4);
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-family: var(--font-pixel);
-      font-size: clamp(10px, 2vw, 13px);
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-    .btn-pixel:hover { filter: brightness(1.06); }
-    .btn-pixel:active { transform: translateY(3px); box-shadow: 0 1px 0 #854d0e; }
-
-    .btn-pixel.blue {
-      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
-      color: #fff;
-      box-shadow: 0 4px 0 #1e3a8a;
-    }
-    .btn-pixel.green {
-      background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
-      color: #fff;
-      box-shadow: 0 4px 0 #14532d;
-    }
-    .btn-pixel.red {
-      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-      color: #fff;
-      box-shadow: 0 4px 0 #7f1d1d;
-    }
-
-    .blink-text {
-      animation: blink 1.1s infinite;
-      font-size: 9px;
-      color: #fef08a;
-      text-shadow: 1px 1px 0 #000;
-    }
-
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0.25; }
-    }
-
-    /* =========================================
-       CAIXA DE DIÁLOGO CLÁSSICA FIRERED
-    ========================================= */
-    #dialogueOverlay {
-      position: absolute;
-      inset: 0;
-      z-index: 35;
-      display: none;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.18);
-      cursor: pointer;
-    }
-    #dialogueOverlay.active { display: flex; }
-
-    .fr-dialogue-box {
-      background: var(--fr-cream);
-      color: #1e293b;
-      border: 4px solid var(--fr-border);
-      border-radius: 12px;
-      box-shadow:
-        inset 0 0 0 3px var(--fr-blue-light),
-        0 6px 18px rgba(0,0,0,0.65);
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 92px;
-      position: relative;
-    }
-
-    .dialogue-portrait-wrap {
-      width: 64px;
-      height: 64px;
-      flex-shrink: 0;
-      background: #dbeafe;
-      border: 3px solid var(--fr-blue);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .dialogue-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .dialogue-speaker {
-      display: inline-block;
-      align-self: flex-start;
-      background: var(--fr-blue);
-      color: #fff;
-      font-size: 9px;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    .dialogue-text {
-      font-family: var(--font-retro);
-      font-size: clamp(18px, 2.8vw, 23px);
-      line-height: 1.15;
-      color: #0f172a;
-      min-height: 44px;
-    }
-
-    .dialogue-next {
-      position: absolute;
-      right: 12px;
-      bottom: 8px;
-      color: #dc2626;
-      font-size: 12px;
-      animation: bounceY 0.7s infinite alternate;
-    }
-
-    @keyframes bounceY {
-      from { transform: translateY(0); }
-      to { transform: translateY(4px); }
-    }
-
-    /* =========================================
-       TELA DE MINI-JOGOS
-    ========================================= */
-    #minigameOverlay {
-      background: #0f172a;
-      padding: 10px;
-      overflow-y: auto;
-      color: #f8fafc;
-    }
-
-    .mg-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #334155;
-      padding-bottom: 6px;
-      margin-bottom: 8px;
-      gap: 8px;
-    }
-
-    .mg-title {
-      font-size: clamp(9px, 1.8vw, 12px);
-      color: #38bdf8;
-    }
-
-    .mg-status {
-      font-family: var(--font-retro);
-      font-size: 18px;
-      color: #fde047;
-    }
-
-    .mg-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    .mg-instruction {
-      font-family: var(--font-retro);
-      font-size: 18px;
-      color: #cbd5e1;
-      background: #1e293b;
-      padding: 6px 10px;
-      border-radius: 8px;
-      border-left: 4px solid #38bdf8;
-    }
-
-    .mg-code-box {
-      background: #020617;
-      border: 2px solid #334155;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #a5f3fc;
-      white-space: pre-wrap;
-      line-height: 1.4;
-    }
-
-    .mg-options {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 6px;
-    }
-
-    .mg-option-btn {
-      background: #1e293b;
-      color: #f8fafc;
-      border: 2px solid #475569;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-family: var(--font-retro);
-      font-size: 18px;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .mg-option-btn:hover { background: #334155; border-color: #38bdf8; }
-    .mg-option-btn.selected { background: #1d4ed8; border-color: #93c5fd; }
-    .mg-option-btn.correct { background: #15803d; border-color: #4ade80; }
-    .mg-option-btn.wrong { background: #b91c1c; border-color: #f87171; }
-
-    .mg-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .mg-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    .mg-feedback {
-      font-family: var(--font-retro);
-      font-size: 18px;
-      text-align: center;
-      min-height: 22px;
-      color: #fde047;
-    }
-
-    /* Arena interativa para mini-jogos de tempo real (Limpeza Térmica e Firewall) */
-    .mg-arena {
-      position: relative;
-      width: 100%;
-      height: 175px;
-      background: #020617;
-      border: 3px solid #334155;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .dust-spot {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #f97316 0%, #9a3412 70%, transparent 100%);
-      border: 2px solid #fdba74;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      animation: pulseSpot 0.8s infinite alternate;
-    }
-    @keyframes pulseSpot {
-      from { transform: scale(0.92); }
-      to { transform: scale(1.12); }
-    }
-
-    .packet-item {
-      position: absolute;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      cursor: pointer;
-      white-space: nowrap;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-    }
-    .packet-safe { background: #16a34a; color: #fff; }
-    .packet-virus { background: #dc2626; color: #fff; }
-
-    /* =========================================
-       TELA DE BATALHA ESTILO POKÉMON FIRERED
-    ========================================= */
-    #battleOverlay {
-      background: #f8f8f0;
-      color: #0f172a;
-      justify-content: space-between;
-    }
-
-    .battle-arena {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 8px 10px;
-    }
-
-    .battle-arena.theme-dev { background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 55%, #1e293b 55%, #0f172a 100%); }
-    .battle-arena.theme-manut { background: linear-gradient(180deg, #431407 0%, #9a3412 55%, #292524 55%, #1c1917 100%); }
-    .battle-arena.theme-adm { background: linear-gradient(180deg, #422006 0%, #a16207 55%, #3f3f46 55%, #18181b 100%); }
-    .battle-arena.theme-redes { background: linear-gradient(180deg, #2e1065 0%, #5b21b6 55%, #0f172a 55%, #020617 100%); }
-
-    /* Barra da Mecânica Especial */
-    .mechanic-bar {
-      background: rgba(15, 23, 42, 0.88);
-      border: 2px solid #facc15;
-      border-radius: 8px;
-      padding: 4px 8px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 8px;
-      z-index: 5;
-    }
-
-    .mechanic-pill {
-      padding: 3px 6px;
-      border-radius: 4px;
-      background: #1e293b;
-      border: 1px solid #475569;
-      font-size: 8px;
-    }
-
-    /* Linhas de Combate */
-    .battle-row-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      z-index: 4;
-    }
-
-    .battle-row-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 8px;
-      z-index: 4;
-    }
-
-    .hp-card {
-      background: #f8f8f0;
-      border: 3px solid #384058;
-      border-radius: 10px 2px 10px 2px;
-      padding: 5px 8px;
-      width: 52%;
-      max-width: 250px;
-      box-shadow: 3px 3px 0 rgba(0,0,0,0.45);
-    }
-
-    .hp-card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 8px;
-      color: #0f172a;
-      margin-bottom: 4px;
-      gap: 4px;
-    }
-
-    .hp-bar-outer {
-      width: 100%;
-      height: 10px;
-      background: #334155;
-      border-radius: 6px;
-      padding: 2px;
-      border: 1px solid #0f172a;
-    }
-
-    .hp-bar-inner {
-      height: 100%;
-      width: 100%;
-      background: var(--hp-green);
-      border-radius: 4px;
-      transition: width 0.35s ease, background-color 0.35s ease;
-    }
-
-    .hp-numbers {
-      text-align: right;
-      font-size: 8px;
-      margin-top: 3px;
-      color: #334155;
-    }
-
-    .sprite-stage {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      width: 44%;
-    }
-
-    .sprite-platform {
-      width: 120px;
-      height: 22px;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, rgba(148,163,184,0.2) 70%, transparent 100%);
-      border-radius: 50%;
-      margin-top: -10px;
-    }
-
-    .battle-sprite-canvas {
-      image-rendering: pixelated;
-      transition: transform 0.15s ease;
-    }
-
-    .shake-hit {
-      animation: shakeAnim 0.35s ease;
-    }
-    @keyframes shakeAnim {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-8px); filter: brightness(2); }
-      50% { transform: translateX(8px); }
-      75% { transform: translateX(-5px); }
-    }
-
-    /* QTE de Compilação (Desenvolvimento) */
-    #qteOverlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(2, 6, 23, 0.82);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      z-index: 20;
-      padding: 16px;
-    }
-    #qteOverlay.active { display: flex; }
-
-    .qte-bar {
-      position: relative;
-      width: 85%;
-      max-width: 340px;
-      height: 28px;
-      background: #dc2626;
-      border: 3px solid #fff;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .qte-zone-yellow {
-      position: absolute;
-      left: 25%;
-      width: 50%;
-      height: 100%;
-      background: #eab308;
-    }
-    .qte-zone-green {
-      position: absolute;
-      left: 42%;
-      width: 16%;
-      height: 100%;
-      background: #22c55e;
-    }
-    .qte-cursor {
-      position: absolute;
-      top: 0;
-      width: 8px;
-      height: 100%;
-      background: #fff;
-      box-shadow: 0 0 8px #000;
-      left: 0%;
-    }
-
-    /* Painel Inferior da Batalha */
-    .battle-bottom-panel {
-      background: #283448;
-      border-top: 4px solid #1e293b;
-      padding: 6px;
-      display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 6px;
-      min-height: 108px;
-    }
-
-    .battle-log-box {
-      background: #1e293b;
-      border: 3px solid #94a3b8;
-      border-radius: 8px;
-      padding: 6px 8px;
-      color: #f8fafc;
-      font-family: var(--font-retro);
-      font-size: clamp(16px, 2.3vw, 20px);
-      line-height: 1.12;
-      display: flex;
-      align-items: center;
-    }
-
-    .battle-moves-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-    }
-
-    .move-btn {
-      background: #f8f8f0;
-      border: 3px solid #475569;
-      border-radius: 8px;
-      padding: 5px 6px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      text-align: left;
-      transition: all 0.1s;
-    }
-    .move-btn:hover:not(:disabled) {
-      background: #fef9c3;
-      border-color: #ca8a04;
-      transform: translateY(-1px);
-    }
-    .move-btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-    .move-btn.corrupted {
-      background: #450a0a;
-      color: #fca5a5;
-      border-color: #ef4444;
-    }
-
-    .move-name {
-      font-family: var(--font-pixel);
-      font-size: clamp(7px, 1.3vw, 8.5px);
-      color: #0f172a;
-      margin-bottom: 2px;
-    }
-    .move-btn.corrupted .move-name { color: #fecaca; }
-
-    .move-meta {
-      font-family: var(--font-retro);
-      font-size: 14px;
-      color: #475569;
-      line-height: 1;
-    }
-    .move-btn.corrupted .move-meta { color: #fca5a5; }
-
-    /* =========================================
-       CONTRATO INTERATIVO FINAL & HALL DA FAMA
-    ========================================= */
-    #contractOverlay {
-      background: #1e293b;
-      padding: 10px;
-      overflow-y: auto;
-      align-items: center;
-    }
-
-    .contract-paper {
-      background: #fefce8;
-      color: #1e293b;
-      border: 4px double #854d0e;
-      border-radius: 8px;
-      padding: 12px 14px;
-      width: 100%;
-      max-width: 560px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .contract-header {
-      text-align: center;
-      border-bottom: 2px solid #ca8a04;
-      padding-bottom: 6px;
-    }
-    .contract-header h2 {
-      margin: 0;
-      font-size: clamp(9px, 1.8vw, 12px);
-      color: #713f12;
-      line-height: 1.4;
-    }
-
-    .contract-text {
-      font-family: var(--font-retro);
-      font-size: 18px;
-      line-height: 1.15;
-      color: #1f2937;
-    }
-
-    .contract-stamps {
-      display: flex;
-      justify-content: space-around;
-      gap: 6px;
-      flex-wrap: wrap;
-      background: #fef9c3;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px dashed #a16207;
-    }
-
-    .stamp-chip {
-      font-family: var(--font-retro);
-      font-size: 15px;
-      background: #fff;
-      border: 2px solid #15803d;
-      color: #166534;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-
-    .signature-box {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .signature-box label {
-      font-size: 8px;
-      color: #713f12;
-    }
-
-    canvas#signatureCanvas {
-      width: 100%;
-      height: 82px;
-      background: #fff;
-      border: 2px dashed #64748b;
-      border-radius: 6px;
-      cursor: crosshair;
-      touch-action: none;
-    }
-
-    .contract-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    #hallOfFameOverlay {
-      background: radial-gradient(circle at center, #1d4ed8 0%, #0f172a 75%);
-      align-items: center;
-      justify-content: space-around;
-      text-align: center;
-      padding: 16px;
-    }
-
-    .hof-title {
-      font-size: clamp(13px, 2.8vw, 20px);
-      color: #fde047;
-      text-shadow: 3px 3px 0 #1e3a8a;
-    }
-
-    .hof-subtitle {
-      font-family: var(--font-retro);
-      font-size: clamp(18px, 2.8vw, 24px);
-      color: #e2e8f0;
-      max-width: 500px;
-      line-height: 1.2;
-    }
-
-    /* =========================================
-       CONTROLES ESTILO GAME BOY ADVANCE
-    ========================================= */
-    .gba-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 10px 4px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 42px);
-      grid-template-rows: repeat(3, 42px);
-      gap: 2px;
-    }
-
-    .dpad-btn {
-      background: linear-gradient(180deg, #374151, #1f2937);
-      border: 2px solid #111827;
-      color: #9ca3af;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 6px;
-      box-shadow: 0 3px 0 #030712;
-      touch-action: manipulation;
-    }
-    .dpad-btn:active, .dpad-btn.pressed {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 #030712;
-      background: #4b5563;
-      color: #fff;
-    }
-    .dpad-center {
-      background: #1f2937;
-      border-radius: 4px;
-      border: 2px solid #111827;
-    }
-
-    .gba-mid-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .gba-brand {
-      font-size: 8px;
-      color: rgba(255,255,255,0.75);
-      letter-spacing: 1px;
-    }
-
-    .pill-controls {
-      display: flex;
-      gap: 8px;
-    }
-
-    .pill-btn {
-      background: #374151;
-      color: #e5e7eb;
-      border: 2px solid #111827;
-      border-radius: 14px;
-      padding: 6px 10px;
-      font-family: var(--font-pixel);
-      font-size: 8px;
-      cursor: pointer;
-      box-shadow: 0 3px 0 #030712;
-    }
-    .pill-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #030712; }
-
-    .ab-buttons {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .round-btn {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: 3px solid #111827;
-      font-family: var(--font-pixel);
-      font-size: 14px;
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #030712, inset 0 2px 4px rgba(255,255,255,0.35);
-      touch-action: manipulation;
-    }
-    .round-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #030712; }
-
-    .btn-b {
-      background: linear-gradient(145deg, #4b5563, #1f2937);
-      margin-top: 18px;
-    }
-    .btn-a {
-      background: linear-gradient(145deg, #22c55e, #15803d);
-      margin-bottom: 18px;
-    }
-
-    .controls-hint {
-      text-align: center;
-      font-family: var(--font-retro);
-      font-size: 16px;
-      color: #fecaca;
-      margin-top: 6px;
-      opacity: 0.9;
-    }
-
-    @media (max-width: 560px) {
-      .dpad {
-        grid-template-columns: repeat(3, 38px);
-        grid-template-rows: repeat(3, 38px);
-      }
-      .round-btn { width: 48px; height: 48px; font-size: 12px; }
-      .battle-bottom-panel { grid-template-columns: 1fr; }
-      .hp-card { width: 58%; }
-    }
-  </style>
+  <link rel="stylesheet" href="Css/index.css">
+</head>
 </head>
 <body>
 
@@ -1058,7 +27,9 @@
           <div class="badge-slot" id="badge-adm" title="Insígnia da Gestão (Administração)">📊</div>
           <div class="badge-slot" id="badge-redes" title="Insígnia da Conexão (Redes)">🌐</div>
         </div>
+        <button class="hud-btn" id="btnSaveGame" title="Salvar Progresso (Auto-save ativo)">💾 SALVAR</button>
         <button class="hud-btn" id="btnAudio" title="Ativar/Desativar Som">🔊 SOM</button>
+        <span class="save-toast" id="saveToast">SALVO!</span>
       </div>
     </div>
 
@@ -1088,7 +59,10 @@
               <span>GUIA HELENA</span>
             </div>
           </div>
-          <button class="btn-pixel" id="btnStartGame">▶ INICIAR JORNADA</button>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 4px 0;">
+            <button class="btn-pixel blue" id="btnContinueGame" style="display: none;">▶ CONTINUAR JORNADA</button>
+            <button class="btn-pixel" id="btnStartGame">▶ INICIAR JORNADA</button>
+          </div>
           <div class="blink-text">PRESSIONE ENTER OU CLIQUE PARA COMEÇAR</div>
         </div>
 
@@ -1331,8 +305,153 @@
     fanfare() {
       const notes = [523, 659, 784, 659, 784, 1046];
       notes.forEach((n, i) => this.tone(n, 0.14, 'square', 0.07, i * 0.12));
+    },
+
+    // --- REPRODUTOR DE TRILHA CHIPTUNE 8-BIT EM LOOP (BGM) ---
+    bgmMode: null,
+    bgmTimer: null,
+    bgmStep: 0,
+    exploreMelody: [
+      330, 392, 440, 494, 523, 494, 440, 392,
+      330, 349, 392, 440, 392, 349, 330, 294,
+      330, 392, 523, 659, 587, 523, 494, 440,
+      392, 440, 494, 523, 587, 494, 523, 0
+    ],
+    exploreBass: [
+      131, 196, 131, 196, 175, 220, 175, 220,
+      147, 220, 147, 220, 196, 247, 196, 247,
+      131, 196, 131, 196, 175, 220, 175, 220,
+      196, 247, 196, 247, 131, 196, 131, 0
+    ],
+    battleMelody: [
+      294, 330, 349, 392, 440, 440, 523, 440,
+      392, 349, 392, 440, 349, 330, 294, 261,
+      294, 294, 349, 349, 440, 440, 587, 523,
+      440, 392, 349, 330, 294, 330, 294, 0
+    ],
+    battleBass: [
+      73, 147, 73, 147, 87, 175, 87, 175,
+      98, 196, 98, 196, 73, 147, 73, 147,
+      73, 147, 73, 147, 87, 175, 87, 175,
+      110, 220, 110, 220, 73, 147, 73, 0
+    ],
+
+    playBgmStep() {
+      if (!this.enabled || !this.bgmMode) return;
+      const isBattle = this.bgmMode === 'battle';
+      const melody = isBattle ? this.battleMelody : this.exploreMelody;
+      const bass = isBattle ? this.battleBass : this.exploreBass;
+      const step = this.bgmStep % melody.length;
+      const mFreq = melody[step];
+      const bFreq = bass[step];
+      const dur = isBattle ? 0.12 : 0.18;
+      if (mFreq > 0) {
+        this.tone(mFreq, dur, isBattle ? 'sawtooth' : 'square', isBattle ? 0.025 : 0.018);
+      }
+      if (bFreq > 0) {
+        this.tone(bFreq, dur, 'triangle', 0.035);
+      }
+      this.bgmStep++;
+    },
+
+    setBgm(mode) {
+      if (this.bgmMode === mode) return;
+      this.stopBgm();
+      if (!mode || !this.enabled) return;
+      this.bgmMode = mode;
+      this.bgmStep = 0;
+      const interval = mode === 'battle' ? 140 : 210;
+      this.bgmTimer = setInterval(() => this.playBgmStep(), interval);
+    },
+
+    stopBgm() {
+      if (this.bgmTimer) {
+        clearInterval(this.bgmTimer);
+        this.bgmTimer = null;
+      }
+      this.bgmMode = null;
+      this.bgmStep = 0;
     }
   };
+
+  /* ==========================================================================
+     SISTEMA DE PERSISTÊNCIA LOCAL (LOCALSTORAGE) COM AUTO-SAVE
+  ========================================================================== */
+  const Storage = {
+    KEY: 'jornada_ds_v1_save',
+    save() {
+      try {
+        const data = {
+          progress: state.progress,
+          contractSigned: state.contractSigned,
+          introSeen: state.introSeen,
+          currentMap: state.currentMap,
+          player: {
+            x: Math.round(state.player.x),
+            y: Math.round(state.player.y),
+            dir: state.player.dir,
+            hp: state.player.hp,
+            maxHp: state.player.maxHp
+          },
+          savedAt: Date.now()
+        };
+        localStorage.setItem(this.KEY, JSON.stringify(data));
+        showSaveNotice();
+        return true;
+      } catch (e) {
+        console.warn('Erro ao salvar no localStorage:', e);
+        return false;
+      }
+    },
+    load() {
+      try {
+        const raw = localStorage.getItem(this.KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data || !data.progress) return false;
+
+        state.progress = data.progress;
+        state.contractSigned = !!data.contractSigned;
+        state.introSeen = !!data.introSeen;
+        if (data.currentMap && MAPS[data.currentMap]) {
+          state.currentMap = data.currentMap;
+        }
+        if (data.player) {
+          state.player.x = data.player.x ?? state.player.x;
+          state.player.y = data.player.y ?? state.player.y;
+          state.player.dir = data.player.dir ?? state.player.dir;
+          state.player.hp = data.player.hp ?? 100;
+          state.player.maxHp = data.player.maxHp ?? 100;
+        }
+        return true;
+      } catch (e) {
+        console.warn('Erro ao carregar do localStorage:', e);
+        return false;
+      }
+    },
+    hasSave() {
+      try {
+        return !!localStorage.getItem(this.KEY);
+      } catch (e) {
+        return false;
+      }
+    },
+    clear() {
+      try {
+        localStorage.removeItem(this.KEY);
+      } catch (e) {}
+    }
+  };
+
+  function showSaveNotice() {
+    const el = document.getElementById('saveToast');
+    if (!el) return;
+    el.classList.add('visible');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => {
+      el.classList.remove('visible');
+    }, 1800);
+  }
 
   /* ==========================================================================
      2. ESTADO GLOBAL DO JOGO
@@ -1766,6 +885,7 @@
     Sound.success();
     state.progress[area]['m' + mNum] = true;
     closeMinigame();
+    Storage.save();
     const bothDone = state.progress[area].m1 && state.progress[area].m2;
     Dialogue.start([
       {
@@ -3340,7 +2460,31 @@
   document.getElementById('btnAudio').onclick = () => {
     Sound.enabled = !Sound.enabled;
     document.getElementById('btnAudio').textContent = Sound.enabled ? '🔊 SOM' : '🔇 MUDO';
-    if (Sound.enabled) Sound.beep();
+    if (Sound.enabled) {
+      Sound.beep();
+      if (state.mode === 'explore') Sound.setBgm('explore');
+      else if (state.mode === 'battle') Sound.setBgm('battle');
+    } else {
+      Sound.stopBgm();
+    }
+  };
+
+  document.getElementById('btnSaveGame').onclick = () => {
+    Sound.select();
+    Storage.save();
+  };
+
+  document.getElementById('btnContinueGame').onclick = () => {
+    if (Storage.load()) {
+      Sound.success();
+      document.getElementById('titleScreen').classList.remove('active');
+      state.mode = 'explore';
+      updateHUD();
+      if (Sound.enabled) Sound.setBgm('explore');
+      Dialogue.start([
+        { speaker: 'HELENA', char: 'helena', text: 'Jogo carregado com sucesso! Bem-vindo de volta à EEEP Jaime Alencar, Lucas.' }
+      ]);
+    }
   };
 
   document.getElementById('btnContinueExplore').onclick = () => {
@@ -3357,6 +2501,10 @@
     renderPortrait('titleLucas', 'lucas');
     renderPortrait('titleHelena', 'helena');
     setupSignaturePad();
+    if (Storage.hasSave()) {
+      const btnCont = document.getElementById('btnContinueGame');
+      if (btnCont) btnCont.style.display = 'inline-block';
+    }
     updateHUD();
     gameLoop();
   };
