@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Jornada DS: Escola Jaime Alencar — Edição FireRed</title>
+  <title>Jornada DS: EEEP Jaime Alencar — Edição FireRed</title>
   <!-- Fonte pixelada estilo Game Boy Advance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,12 +51,12 @@
           </div>
           <div class="title-chars">
             <div class="title-char-card">
-              <canvas id="titleLucas" width="48" height="48" class="battle-sprite-canvas"></canvas>
-              <span>LUCAS FERREIRA</span>
+              <canvas id="titleHelena" width="48" height="48" class="battle-sprite-canvas"></canvas>
+              <span>ESTUDANTE HELENA</span>
             </div>
             <div class="title-char-card">
-              <canvas id="titleHelena" width="48" height="48" class="battle-sprite-canvas"></canvas>
-              <span>GUIA HELENA</span>
+              <canvas id="titleLucas" width="48" height="48" class="battle-sprite-canvas"></canvas>
+              <span>GUIA LUCAS</span>
             </div>
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 4px 0;">
@@ -126,7 +126,7 @@
               </div>
               <div class="hp-card">
                 <div class="hp-card-head">
-                  <span>LUCAS FERREIRA</span>
+                  <span>HELENA</span>
                   <span>Nv.20</span>
                 </div>
                 <div class="hp-bar-outer">
@@ -162,7 +162,7 @@
               <h2>CONTRATO DE MATRÍCULA OFICIAL<br>CURSO TÉCNICO EM DESENVOLVIMENTO DE SISTEMAS</h2>
             </div>
             <div class="contract-text">
-              Eu, <strong>Lucas Ferreira</strong>, estudante oriundo da <strong>Escola Johnson</strong>, declaro que conheci com sucesso todas as 4 áreas do curso de Desenvolvimento de Sistemas da <strong>EEEP Jaime Alencar de Oliveira</strong>, sob a orientação de <strong>Helena</strong>, e confirmo minha matrícula para esta nova jornada!
+              Eu, <strong>Helena</strong>, estudante vindícola que vem de outra escola para conhecer os cursos da <strong>EEEP Jaime Alencar de Oliveira</strong>, declaro que conheci com sucesso todas as 4 áreas do curso de Desenvolvimento de Sistemas, sob a orientação do guia <strong>Lucas Ferreira</strong>, e confirmo minha matrícula para esta nova jornada!
             </div>
             <div class="contract-stamps">
               <span class="stamp-chip">💻 Código ✓</span>
@@ -171,7 +171,7 @@
               <span class="stamp-chip">🌐 Conexão ✓</span>
             </div>
             <div class="signature-box">
-              <label>ASSINE ABAIXO COM O MOUSE OU DEDO (LUCAS FERREIRA):</label>
+              <label>ASSINE ABAIXO COM O MOUSE OU DEDO (HELENA):</label>
               <canvas id="signatureCanvas" width="460" height="82"></canvas>
             </div>
             <div class="mg-feedback" id="contractMsg" style="color:#b91c1c; min-height:18px;"></div>
@@ -185,15 +185,15 @@
         <!-- Tela Final Hall da Fama -->
         <div class="overlay-screen" id="hallOfFameOverlay">
           <div class="title-badge">★ HALL DA FAMA — EEEP JAIME ALENCAR DE OLIVEIRA ★</div>
-          <div class="hof-title">PARABÉNS, LUCAS FERREIRA!</div>
+          <div class="hof-title">PARABÉNS, HELENA!</div>
           <div class="title-chars">
             <div class="title-char-card">
-              <canvas id="hofLucas" width="56" height="56" class="battle-sprite-canvas"></canvas>
-              <span>NOVO ALUNO DS</span>
+              <canvas id="hofHelena" width="56" height="56" class="battle-sprite-canvas"></canvas>
+              <span>NOVA ALUNA DS</span>
             </div>
             <div class="title-char-card">
-              <canvas id="hofHelena" width="56" height="56" class="battle-sprite-canvas"></canvas>
-              <span>GUIA HELENA</span>
+              <canvas id="hofLucas" width="56" height="56" class="battle-sprite-canvas"></canvas>
+              <span>GUIA LUCAS</span>
             </div>
           </div>
           <div class="hof-subtitle">
@@ -224,7 +224,7 @@
       <div class="gba-mid-buttons">
         <div class="gba-brand">JAIME ALENCAR ADVANCE SP</div>
         <div class="pill-controls">
-          <button class="pill-btn" id="btnGuide">💬 GUIA HELENA</button>
+          <button class="pill-btn" id="btnGuide">💬 GUIA LUCAS</button>
         </div>
       </div>
 
@@ -497,8 +497,8 @@
      3. RENDERIZADOR DE SPRITES PIXEL-ART (PERSONAGENS E RETRATOS)
   ========================================================================== */
   const CHAR_PALETTES = {
-    lucas: { hair: '#1e1b4b', cap: '#dc2626', skin: '#f5cfa0', shirt: '#2563eb', pants: '#1e293b', accent: '#ffffff' },
     helena: { hair: '#7c2d12', cap: '#facc15', skin: '#f6d2a8', shirt: '#ec4899', pants: '#312e81', accent: '#fde047' },
+    lucas: { hair: '#1e1b4b', cap: '#dc2626', skin: '#f5cfa0', shirt: '#2563eb', pants: '#1e293b', accent: '#ffffff' },
     falcao: { hair: '#0f172a', cap: '#0284c7', skin: '#e6b88a', shirt: '#0f172a', pants: '#1e3a8a', accent: '#38bdf8' },
     alysson: { hair: '#3f2718', cap: '#1d4ed8', skin: '#f0c497', shirt: '#1e40af', pants: '#0f172a', accent: '#60a5fa' },
     igor: { hair: '#1c1917', cap: '#ea580c', skin: '#e8ba8c', shirt: '#c2410c', pants: '#292524', accent: '#fdba74' },
@@ -631,8 +631,9 @@
         { x: 3, y: 9, to: 'adm', tx: 7, ty: 8, dir: 'up' },
         { x: 11, y: 9, to: 'redes', tx: 7, ty: 8, dir: 'up' }
       ],
+  // Mapeamento de entidades no mapa Courtyard (Helena é a player, Lucas é o guia no pátio)
       entities: [
-        { id: 'helena', type: 'helena', name: 'Helena', x: 7, y: 4, char: 'helena' },
+        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 4, char: 'lucas' },
         { id: 'sign1', type: 'sign', x: 6, y: 1, text: 'EEEP JAIME ALENCAR DE OLIVEIRA — Curso Técnico em Desenvolvimento de Sistemas. Explore as 4 áreas!' },
         { id: 'sign2', type: 'sign', x: 8, y: 1, text: 'Norte-Oeste: Desenvolvimento | Norte-Leste: Manutenção | Sul-Oeste: Administração | Sul-Leste: Redes.' }
       ]
@@ -788,7 +789,7 @@
   };
 
   /* ==========================================================================
-     6. HUD E GUIA DA HELENA
+     6. HUD E GUIA DO LUCAS
   ========================================================================== */
   function countBadges() {
     return ['dev', 'manut', 'adm', 'redes'].filter(k => state.progress[k].boss).length;
@@ -807,9 +808,9 @@
     const earned = countBadges();
     let obj = '';
     if (earned === 4 && !state.contractSigned) {
-      obj = 'Todas as 4 Insígnias! Fale com a Helena no Pátio!';
+      obj = 'Todas as 4 Insígnias! Fale com o Lucas no Pátio!';
     } else if (state.contractSigned) {
-      obj = 'Parabéns! Você já é aluno de DS da Jaime Alencar!';
+      obj = 'Parabéns! Você já é aluna de DS da Jaime Alencar!';
     } else if (state.currentMap === 'courtyard') {
       const nextArea = ['dev', 'manut', 'adm', 'redes'].find(k => !state.progress[k].boss);
       obj = `Visite ${AREA_INFO[nextArea].name} (${earned}/4 Insígnias)`;
@@ -834,11 +835,11 @@
     if (earned === 4 && !state.contractSigned) {
       Sound.fanfare();
       Dialogue.start([
-        { speaker: 'HELENA', char: 'helena', text: 'Lucas!! Você conseguiu! Conquistou as 4 Insígnias da EEEP Jaime Alencar de Oliveira!' },
-        { speaker: 'LUCAS FERREIRA', char: 'lucas', text: 'Helena, eu quero muito te agradecer! Sem a sua ajuda e suas dicas em cada área, eu nunca teria conseguido vencer todos os chefes.' },
-        { speaker: 'LUCAS FERREIRA', char: 'lucas', text: 'Eu vim da Escola Johnson curioso para conhecer o curso, e agora tenho certeza absoluta de que quero fazer Desenvolvimento de Sistemas aqui!' },
-        { speaker: 'HELENA', char: 'helena', text: 'Que alegria ouvir isso, Lucas! Falcão, Alysson, Igor, Leôncio, Maryanne, Wendila, Dudu e Alisson já aprovaram sua entrada.' },
-        { speaker: 'HELENA', char: 'helena', text: 'Aqui está o Contrato Oficial de Matrícula do curso. Basta assinar para oficializar seu lugar na Jaime Alencar!' }
+        { speaker: 'LUCAS', char: 'lucas', text: 'Helena!! Você conseguiu! Conquistou as 4 Insígnias da EEEP Jaime Alencar de Oliveira!' },
+        { speaker: 'HELENA', char: 'helena', text: 'Lucas, eu quero muito te agradecer! Sem a sua orientação e suas dicas em cada área, eu nunca teria conseguido vencer todos os chefes.' },
+        { speaker: 'HELENA', char: 'helena', text: 'Eu vim de outra escola curiosa para conhecer os cursos, e agora tenho certeza absoluta de que quero fazer Desenvolvimento de Sistemas aqui!' },
+        { speaker: 'LUCAS', char: 'lucas', text: 'Que alegria ver você brilhar, Helena! Falcão, Alysson, Igor, Leôncio, Maryanne, Wendila, Dudu e Alisson já aprovaram sua entrada.' },
+        { speaker: 'LUCAS', char: 'lucas', text: 'Aqui está o Contrato Oficial de Matrícula do curso. Basta assinar para oficializar seu lugar na Jaime Alencar!' }
       ], () => {
         openContractScreen();
       });
@@ -851,7 +852,7 @@
 
     if (state.contractSigned) {
       Dialogue.start([
-        { speaker: 'HELENA', char: 'helena', text: 'Bem-vindo oficialmente ao curso de Desenvolvimento de Sistemas, Lucas! Sua energia está 100% restaurada.' }
+        { speaker: 'LUCAS', char: 'lucas', text: 'Bem-vinda oficialmente ao curso de Desenvolvimento de Sistemas, Helena! Sua energia está 100% restaurada.' }
       ]);
       return;
     }
@@ -860,9 +861,9 @@
     const names = pending.map(k => AREA_INFO[k].name.replace('LAB. ', '').replace('OFICINA DE ', '').replace('SALA DE ', '').replace('CENTRAL DE ', ''));
 
     Dialogue.start([
-      { speaker: 'HELENA', char: 'helena', text: 'Oi, Lucas! Restaurei seu HP para 100% (tipo um Centro Pokémon!).' },
-      { speaker: 'HELENA', char: 'helena', text: `Você já tem ${earned}/4 Insígnias. Ainda faltam as áreas: ${names.join(', ')}.` },
-      { speaker: 'HELENA', char: 'helena', text: 'Lembre-se: em cada sala, complete as 2 missões com os monitores para desbloquear a batalha contra a dupla de Chefes!' }
+      { speaker: 'LUCAS', char: 'lucas', text: 'Oi, Helena! Restaurei seu HP para 100% (tipo um Centro Pokémon!).' },
+      { speaker: 'LUCAS', char: 'lucas', text: `Você já tem ${earned}/4 Insígnias. Ainda faltam as áreas: ${names.join(', ')}.` },
+      { speaker: 'LUCAS', char: 'lucas', text: 'Lembre-se: em cada sala, complete as 2 missões com os monitores para desbloquear a batalha contra a dupla de Chefes!' }
     ]);
   }
 
@@ -1531,11 +1532,11 @@
 
       // Render sprites na batalha
       renderPortrait('bossSpriteCanvas', data.char1, data.char2);
-      renderPortrait('playerSpriteCanvas', 'lucas');
+      renderPortrait('playerSpriteCanvas', 'helena');
 
       overlay.classList.add('active');
       this.updateUI();
-      this.setLog(`${data.name} desafiaram Lucas Ferreira!`);
+      this.setLog(`${data.name} desafiaram Helena!`);
       this.renderMoves();
     },
 
@@ -1921,6 +1922,7 @@
       }
     },
 
+  // --- AÇÕES BATALHA & CONEXÃO COM O GUIA LUCAS ---
     victory() {
       Sound.fanfare();
       const area = this.area;
@@ -1933,13 +1935,13 @@
       const earned = countBadges();
       const lines = [
         { speaker: data.name, char: data.char1, char2: data.char2, text: data.winText },
-        { speaker: 'LUCAS FERREIRA', char: 'lucas', text: `Consegui a ${AREA_INFO[area].badge}! (${earned}/4 Insígnias)` }
+        { speaker: 'HELENA', char: 'helena', text: `Consegui a ${AREA_INFO[area].badge}! (${earned}/4 Insígnias)` }
       ];
       if (earned === 4) {
         lines.push({
-          speaker: 'HELENA',
-          char: 'helena',
-          text: 'Lucas, você conquistou TODAS as 4 Insígnias! Volte ao Pátio Central e venha falar comigo para uma grande surpresa!'
+          speaker: 'LUCAS',
+          char: 'lucas',
+          text: 'Helena, você conquistou TODAS as 4 Insígnias! Volte ao Pátio Central e venha falar comigo para assinar o seu contrato!'
         });
       }
       Dialogue.start(lines);
@@ -1950,7 +1952,7 @@
       document.getElementById('battleOverlay').classList.remove('active');
       state.player.hp = state.player.maxHp;
       Dialogue.start([
-        { speaker: 'HELENA', char: 'helena', text: 'Quase lá, Lucas! Eu restaurei suas energias. Respire fundo, use a mecânica especial da sala a seu favor e tente novamente!' }
+        { speaker: 'LUCAS', char: 'lucas', text: 'Quase lá, Helena! Eu restaurei suas energias. Respire fundo, use a mecânica especial da sala a seu favor e tente novamente!' }
       ]);
     }
   };
@@ -2120,7 +2122,7 @@
 
     if (!target) return;
 
-    if (target.type === 'helena') {
+    if (target.type === 'guide') {
       talkToHelena();
     } else if (target.type === 'sign') {
       Dialogue.start([{ speaker: 'PLACA DA ESCOLA', char: 'lucas', text: target.text }]);
@@ -2131,12 +2133,12 @@
       if (prog.boss) {
         const bData = BOSS_DATA[target.area];
         Dialogue.start([
-          { speaker: bData.name, char: bData.char1, char2: bData.char2, text: 'Você já venceu nosso desafio e conquistou nossa Insígnia! Parabéns, Lucas!' }
+          { speaker: bData.name, char: bData.char1, char2: bData.char2, text: 'Você já venceu nosso desafio e conquistou nossa Insígnia! Parabéns, Helena!' }
         ]);
       } else if (!prog.m1 || !prog.m2) {
         const bData = BOSS_DATA[target.area];
         Dialogue.start([
-          { speaker: bData.name, char: bData.char1, char2: bData.char2, text: 'Calma lá, Lucas Ferreira! Antes de nos enfrentar, conclua as 2 missões desta área com os monitores da sala!' }
+          { speaker: bData.name, char: bData.char1, char2: bData.char2, text: 'Calma lá, Helena! Antes de nos enfrentar, conclua as 2 missões desta área com os monitores da sala!' }
         ]);
       } else {
         const bData = BOSS_DATA[target.area];
@@ -2264,9 +2266,9 @@
         drawFloatingTag(ex + 16, ey - 6, tag, prog.boss ? '#16a34a' : (prog.m1 && prog.m2) ? '#dc2626' : '#475569');
       } else {
         drawPixelChar(ctx, ex + 2, ey + 2, 28, ent.char, 'down', 0);
-        if (ent.type === 'helena') {
+        if (ent.type === 'guide') {
           const allDone = countBadges() === 4 && !state.contractSigned;
-          drawFloatingTag(ex + 16, ey - 4, allDone ? '★ CONTRATO!' : 'HELENA', allDone ? '#ca8a04' : '#db2777');
+          drawFloatingTag(ex + 16, ey - 4, allDone ? '★ CONTRATO!' : 'LUCAS', allDone ? '#ca8a04' : '#2563eb');
         } else if (ent.type === 'mission') {
           const done = state.progress[ent.area]['m' + ent.mNum];
           drawFloatingTag(ex + 16, ey - 4, done ? `✓ M${ent.mNum}` : `! MISSÃO ${ent.mNum}`, done ? '#15803d' : '#2563eb');
@@ -2274,8 +2276,8 @@
       }
     });
 
-    // 3. Jogador (Lucas Ferreira)
-    drawPixelChar(ctx, state.player.x - 3, state.player.y - 4, 28, 'lucas', state.player.dir, state.player.frame);
+    // 3. Jogador (Helena)
+    drawPixelChar(ctx, state.player.x - 3, state.player.y - 4, 28, 'helena', state.player.dir, state.player.frame);
 
     // 4. Rótulos das Portas/Setores
     if (map.labels) {
