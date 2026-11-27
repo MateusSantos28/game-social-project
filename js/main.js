@@ -361,37 +361,23 @@
   // 3: Mesa / Bancada / Rack sólido
   // 4: Tapete / Porta de transição
   // 5: Placa informativa (interagível)
-<<<<<<< HEAD
-=======
-  // 6: Tapete central do Pátio
+  // 6: Caminho / Trilha de lajotas em direção às portas do pátio
   // 7: Balanço interativo (assento)
   // 8: Árvore decorativa com tronco sólido
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
 
   const MAPS = {
     courtyard: {
       theme: 'courtyard',
       grid: [
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1],
-<<<<<<< HEAD
-        [1,2,2,0,2,1,5,1,5,1,2,0,2,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,2,0,2,1,1,0,1,1,2,0,2,2,1],
-=======
-        [1,2,2,0,2,8,5,8,5,8,2,0,2,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,6,6,6,6,6,0,0,0,2,1],
-        [1,2,0,0,6,6,6,6,6,6,6,0,0,2,1],
-        [1,0,0,0,6,6,6,6,6,6,6,0,0,0,1],
-        [1,2,0,0,0,6,6,6,6,6,0,0,0,2,1],
-        [1,2,0,0,0,0,6,6,6,0,0,0,0,2,1],
-        [1,2,2,0,2,8,8,0,8,8,2,0,2,2,1],
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
+        [1,2,2,6,2,8,5,8,5,8,2,6,2,2,1],
+        [1,2,0,6,0,0,6,6,6,0,0,6,0,2,1],
+        [1,2,0,0,6,0,0,6,0,0,6,0,0,2,1],
+        [1,2,0,0,0,6,0,6,0,6,0,0,0,2,1],
+        [1,0,0,0,0,0,6,6,6,0,0,0,0,0,1],
+        [1,2,0,0,0,6,0,6,0,6,0,0,0,2,1],
+        [1,2,0,0,6,0,0,6,0,0,6,0,0,2,1],
+        [1,2,2,6,0,0,6,6,6,0,0,6,2,2,1],
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1]
       ],
       labels: [
@@ -406,14 +392,8 @@
         { x: 3, y: 9, to: 'adm', tx: 7, ty: 8, dir: 'up' },
         { x: 11, y: 9, to: 'redes', tx: 7, ty: 8, dir: 'up' }
       ],
-<<<<<<< HEAD
-  // Mapeamento de entidades no mapa Courtyard (Helena é a player, Lucas é o guia no pátio)
-      entities: [
-        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 4, char: 'lucas' },
-=======
       entities: [
         { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 5, char: 'lucas' },
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
         { id: 'sign1', type: 'sign', x: 6, y: 1, text: 'EEEP JAIME ALENCAR DE OLIVEIRA — Curso Técnico em Desenvolvimento de Sistemas. Explore as 4 áreas!' },
         { id: 'sign2', type: 'sign', x: 8, y: 1, text: 'Norte-Oeste: Desenvolvimento | Norte-Leste: Manutenção | Sul-Oeste: Administração | Sul-Leste: Redes.' }
       ]
@@ -469,12 +449,12 @@
       areaKey: 'adm',
       grid: [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,3,3,0,0,0,0,0,0,0,0,0,3,3,1],
+        [1,3,3,3,3,3,3,3,3,3,3,3,3,3,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,3,0,0,0,0,0,0,0,3,0,0,1],
-        [1,0,0,3,0,0,0,0,0,0,0,3,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,3,3,0,0,0,0,0,0,0,3,3,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,1,1,1,1,1,1,4,1,1,1,1,1,1,1]
@@ -1852,11 +1832,7 @@
       const r = Math.floor(pt.y / TILE);
       if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return true;
       const tile = map.grid[r][c];
-<<<<<<< HEAD
-      if (tile === 1 || tile === 3 || tile === 5) return true;
-=======
       if (tile === 1 || tile === 3 || tile === 5 || tile === 7 || tile === 8) return true;
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
 
       // Colisão com NPCs e Chefes
       for (const ent of map.entities) {
@@ -1908,13 +1884,8 @@
 
     if (target.type === 'guide') {
       talkToHelena();
-<<<<<<< HEAD
-    } else if (target.type === 'sign') {
-      Dialogue.start([{ speaker: 'PLACA DA ESCOLA', char: 'lucas', text: target.text }]);
-=======
     } else if (target.type === 'sign' || target.type === 'swing') {
       Dialogue.start([{ speaker: target.type === 'swing' ? 'BALANÇO DA ESCOLA' : 'PLACA DA ESCOLA', char: 'helena', text: target.text }]);
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
     } else if (target.type === 'mission') {
       startMinigame(target.area, target.mNum);
     } else if (target.type === 'boss') {
@@ -1949,10 +1920,6 @@
 
     // Fundo base (chão)
     if (theme === 'courtyard') {
-<<<<<<< HEAD
-      ctx.fillStyle = (c + r) % 2 === 0 ? '#e5e7eb' : '#dbe2ea';
-      ctx.fillRect(x, y, TILE, TILE);
-=======
       // Chão de madeira rústica e aconchegante para substituir o tom branco
       ctx.fillStyle = (c + r) % 2 === 0 ? '#b45309' : '#92400e';
       ctx.fillRect(x, y, TILE, TILE);
@@ -1963,7 +1930,6 @@
         ctx.fillStyle = 'rgba(0,0,0,0.12)';
         ctx.fillRect(x + TILE / 2 - 1, y, 2, TILE - 4);
       }
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
     } else if (theme === 'dev') {
       ctx.fillStyle = (c + r) % 2 === 0 ? '#dbeafe' : '#cfe2ff';
       ctx.fillRect(x, y, TILE, TILE);
@@ -2026,36 +1992,28 @@
         ctx.fillRect(x + 18, y + 10, 4, 4);
       }
     } else if (tile === 4) {
-      // Tapete / Portal de entrada
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
-      ctx.fillStyle = '#fde047';
-      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
-<<<<<<< HEAD
-    } else if (tile === 5) {
-      // Placa de madeira
+      // Porta de madeira detalhada com maçaneta dourada (abre ao pisar)
       ctx.fillStyle = '#78350f';
-      ctx.fillRect(x + 13, y + 18, 6, 12);
-      ctx.fillStyle = '#b45309';
-      ctx.fillRect(x + 4, y + 4, TILE - 8, 16);
-      ctx.fillStyle = '#fef3c7';
-      ctx.fillRect(x + 7, y + 8, TILE - 14, 3);
-      ctx.fillRect(x + 7, y + 13, TILE - 18, 3);
-=======
+      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 2);
+      // Painel interno da porta
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 8);
+      // Maçaneta dourada
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(x + TILE - 8, y + TILE / 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      // Detalhe de luz / brilho superior
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, 3);
     } else if (tile === 6) {
-      // Tapete circular em tons de marrom elegante
-      ctx.fillStyle = '#78350f';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 2 - 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#b45309';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 5, 0, Math.PI * 2);
-      ctx.fill();
+      // Caminho verde natural (combinando com a grama do exterior/escola)
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
+      ctx.fillStyle = '#4ade80';
+      ctx.fillRect(x + 10, y + 10, TILE - 20, 2);
     } else if (tile === 7) {
       // Balanço (Assento de madeira com cordas)
       ctx.fillStyle = '#e2e8f0';
@@ -2077,7 +2035,6 @@
       ctx.beginPath();
       ctx.arc(x + TILE / 2 - 4, y + 10, 8, 0, Math.PI * 2);
       ctx.fill();
->>>>>>> 46f9260 (coisas certas falta bem pouquin pra daqui a pouco)
     }
   }
 
