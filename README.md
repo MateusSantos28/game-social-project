@@ -2,6 +2,10 @@
 
 Jogo educativo 2D pixel-art inspirado em clássicos de GBA (estilo Pokémon FireRed) para apresentar o curso técnico em Desenvolvimento de Sistemas da EEEP Jaime Alencar de Oliveira aos novos estudantes.
 
+A interface do jogo é construída com React e TypeScript (TSX). O mapa e os
+sprites continuam sendo desenhados no Canvas 2D para preservar o funcionamento
+do jogo.
+
 ## 🚀 Como executar o projeto
 
 ### Pré-requisitos

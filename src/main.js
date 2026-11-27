@@ -464,7 +464,8 @@
       entities: [
         { id: 'adm_m1', type: 'mission', area: 'adm', mNum: 1, name: 'Analista Caixa', x: 4, y: 5, char: 'npc' },
         { id: 'adm_m2', type: 'mission', area: 'adm', mNum: 2, name: 'Quadro Kanban', x: 10, y: 5, char: 'npc' },
-        { id: 'adm_boss', type: 'boss', area: 'adm', name: 'Maryanne & Wendila', x: 7, y: 2, char: 'maryanne', char2: 'wendila' }
+        { id: 'adm_boss', type: 'boss', area: 'adm', name: 'Maryanne & Wendila', x: 7, y: 2, char: 'maryanne', char2: 'wendila' },
+        { id: 'adm_sofa', type: 'sofa', name: 'Sofá da Administração', x: 2, y: 6, w: 2, h: 1 }
       ]
     },
     redes: {
@@ -1834,9 +1835,19 @@
       const tile = map.grid[r][c];
       if (tile === 1 || tile === 3 || tile === 5 || tile === 7 || tile === 8) return true;
 
-      // Colisão com NPCs e Chefes
+      // Colisão com NPCs, Chefes e Objetos Especiais (como o Sofá)
       for (const ent of map.entities) {
         if (ent.type === 'sign') continue;
+        if (ent.type === 'sofa') {
+          const sx = ent.x * TILE;
+          const sy = ent.y * TILE;
+          const sw = (ent.w || 2) * TILE;
+          const sh = (ent.h || 1) * TILE;
+          if (pt.x >= sx && pt.x <= sx + sw && pt.y >= sy + 6 && pt.y <= sy + sh + 2) {
+            return true;
+          }
+          continue;
+        }
         const ex = ent.x * TILE;
         const ey = ent.y * TILE;
         if (pt.x > ex + 3 && pt.x < ex + TILE - 3 && pt.y > ey + 4 && pt.y < ey + TILE - 2) {
@@ -1871,6 +1882,20 @@
     let target = null;
     let bestDist = 42;
     for (const ent of map.entities) {
+      if (ent.type === 'sofa') {
+        const sx = ent.x * TILE;
+        const sy = ent.y * TILE;
+        const sw = (ent.w || 2) * TILE;
+        const sh = (ent.h || 1) * TILE;
+        const closestX = Math.max(sx, Math.min(fx, sx + sw));
+        const closestY = Math.max(sy, Math.min(fy, sy + sh));
+        const dist = Math.hypot(fx - closestX, fy - closestY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          target = ent;
+        }
+        continue;
+      }
       const ex = ent.x * TILE + TILE / 2;
       const ey = ent.y * TILE + TILE / 2;
       const dist = Math.hypot(fx - ex, fy - ey);
@@ -1884,6 +1909,22 @@
 
     if (target.type === 'guide') {
       talkToHelena();
+    } else if (target.type === 'sofa') {
+      const isDamaged = state.player.hp < 100;
+      if (isDamaged) {
+        Dialogue.start([
+          { speaker: 'SOFÁ DA ADMINISTRAÇÃO', char: 'helena', text: 'Você se acomoda no macio e elegante sofá de couro vermelho da Administração. O descanso revitalizou suas forças!' },
+          { speaker: 'SISTEMA', char: 'helena', text: '✨ Seu HP foi totalmente recuperado (100 HP)!' }
+        ], () => {
+          Sound.heal();
+          state.player.hp = 100;
+          updateHUD();
+        });
+      } else {
+        Dialogue.start([
+          { speaker: 'SOFÁ DA ADMINISTRAÇÃO', char: 'helena', text: 'Um clássico e aconchegante sofá de couro vermelho com manta listrada e capitonê. Um lugar perfeito para reuniões e descanso na Gestão!' }
+        ]);
+      }
     } else if (target.type === 'sign' || target.type === 'swing') {
       Dialogue.start([{ speaker: target.type === 'swing' ? 'BALANÇO DA ESCOLA' : 'PLACA DA ESCOLA', char: 'helena', text: target.text }]);
     } else if (target.type === 'mission') {
@@ -2040,6 +2081,128 @@
     }
   }
 
+  /* ==========================================================================
+     SOFÁ RETRÔ DA SALA DE ADMINISTRAÇÃO (ESTILO POKÉMON FIRERED / TOP-DOWN 2D)
+  ========================================================================== */
+  function drawPixelSofa(ctx, x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Sombra suave no chão (estilo Pokémon GBA)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(4, 28, 56, 4);
+    ctx.fillRect(8, 31, 48, 2);
+
+    // 2. Pezinhos de madeira escura
+    ctx.fillStyle = '#3b1d11';
+    ctx.fillRect(4, 27, 4, 3);
+    ctx.fillRect(30, 27, 4, 3);
+    ctx.fillRect(56, 27, 4, 3);
+
+    // 3. Contorno externo escuro do sofá (estilo clássico FireRed)
+    ctx.fillStyle = '#2b0b12';
+    ctx.fillRect(2, 4, 60, 24);
+
+    // 4. Encosto do sofá (duas almofadas altas com capitonê)
+    // Base do encosto
+    ctx.fillStyle = '#7f1d1d';
+    ctx.fillRect(4, 5, 56, 12);
+
+    // Almofada esquerda do encosto
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(5, 6, 26, 10);
+    // Realce de luz no topo do encosto esquerdo
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(6, 6, 24, 2);
+    ctx.fillStyle = '#fca5a5';
+    ctx.fillRect(8, 6, 10, 1);
+    // Botões capitonê da almofada esquerda
+    ctx.fillStyle = '#450a0a';
+    ctx.fillRect(11, 10, 3, 3);
+    ctx.fillRect(21, 10, 3, 3);
+    ctx.fillStyle = '#fee2e2';
+    ctx.fillRect(12, 10, 1, 1);
+    ctx.fillRect(22, 10, 1, 1);
+
+    // Almofada direita do encosto
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(33, 6, 26, 10);
+    // Realce de luz no topo do encosto direito
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(34, 6, 24, 2);
+    ctx.fillStyle = '#fca5a5';
+    ctx.fillRect(36, 6, 10, 1);
+    // Botões capitonê da almofada direita
+    ctx.fillStyle = '#450a0a';
+    ctx.fillRect(39, 10, 3, 3);
+    ctx.fillRect(49, 10, 3, 3);
+    ctx.fillStyle = '#fee2e2';
+    ctx.fillRect(40, 10, 1, 1);
+    ctx.fillRect(50, 10, 1, 1);
+
+    // Divisória / costura central do encosto
+    ctx.fillStyle = '#2b0b12';
+    ctx.fillRect(31, 5, 2, 12);
+
+    // 5. Assentos do sofá (duas almofadas macias vistas de cima)
+    // Sombra entre encosto e assento
+    ctx.fillStyle = '#450a0a';
+    ctx.fillRect(4, 16, 56, 2);
+
+    // Assento esquerdo
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(5, 18, 26, 9);
+    // Brilho na almofada esquerda
+    ctx.fillStyle = '#f87171';
+    ctx.fillRect(7, 18, 22, 1);
+    // Sombra na borda frontal
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(5, 25, 26, 2);
+
+    // Assento direito
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(33, 18, 26, 9);
+    // Brilho na almofada direita
+    ctx.fillStyle = '#f87171';
+    ctx.fillRect(35, 18, 22, 1);
+    // Sombra na borda frontal
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(33, 25, 26, 2);
+
+    // Divisória central dos assentos
+    ctx.fillStyle = '#2b0b12';
+    ctx.fillRect(31, 16, 2, 11);
+
+    // 6. Braço esquerdo arredondado
+    ctx.fillStyle = '#2b0b12';
+    ctx.fillRect(1, 8, 5, 19);
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(2, 9, 3, 17);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(2, 9, 3, 2);
+    ctx.fillStyle = '#fca5a5';
+    ctx.fillRect(3, 9, 1, 1);
+
+    // 7. Braço direito com mantinha decorativa (homenagem à imagem de referência)
+    ctx.fillStyle = '#2b0b12';
+    ctx.fillRect(58, 8, 5, 19);
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(59, 9, 3, 17);
+
+    // Manta em linho claro com listra vermelha
+    ctx.fillStyle = '#fef9c3';
+    ctx.fillRect(58, 10, 4, 11);
+    // Listras vermelhas da manta
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(58, 13, 4, 1);
+    ctx.fillRect(58, 17, 4, 1);
+    // Franja da manta
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(59, 21, 2, 2);
+
+    ctx.restore();
+  }
+
   function renderGame() {
     const map = MAPS[state.currentMap];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2051,32 +2214,58 @@
       }
     }
 
-    // 2. Entidades (Helena, Monitores de Missão, Chefes)
+    // 2. Renderiza Entidades e Jogador ordenados por profundidade Y (efeito de profundidade 2.5D)
+    const renderList = [];
+
     map.entities.forEach(ent => {
       if (ent.type === 'sign') return;
+      if (ent.type === 'sofa') {
+        renderList.push({
+          y: ent.y * TILE + 28,
+          draw: () => drawPixelSofa(ctx, ent.x * TILE, ent.y * TILE)
+        });
+        return;
+      }
       const ex = ent.x * TILE;
       const ey = ent.y * TILE;
 
       if (ent.type === 'boss') {
-        drawPixelChar(ctx, ex - 10, ey, 28, ent.char, 'down', 0);
-        drawPixelChar(ctx, ex + 12, ey, 28, ent.char2, 'down', 0);
-        const prog = state.progress[ent.area];
-        const tag = prog.boss ? '★ VENCIDOS' : (prog.m1 && prog.m2) ? '⚔️ DESAFIAR!' : '🔒 FAÇA 2 MISSÕES';
-        drawFloatingTag(ex + 16, ey - 6, tag, prog.boss ? '#16a34a' : (prog.m1 && prog.m2) ? '#dc2626' : '#475569');
+        renderList.push({
+          y: ey + 24,
+          draw: () => {
+            drawPixelChar(ctx, ex - 10, ey, 28, ent.char, 'down', 0);
+            drawPixelChar(ctx, ex + 12, ey, 28, ent.char2, 'down', 0);
+            const prog = state.progress[ent.area];
+            const tag = prog.boss ? '★ VENCIDOS' : (prog.m1 && prog.m2) ? '⚔️ DESAFIAR!' : '🔒 FAÇA 2 MISSÕES';
+            drawFloatingTag(ex + 16, ey - 6, tag, prog.boss ? '#16a34a' : (prog.m1 && prog.m2) ? '#dc2626' : '#475569');
+          }
+        });
       } else {
-        drawPixelChar(ctx, ex + 2, ey + 2, 28, ent.char, 'down', 0);
-        if (ent.type === 'guide') {
-          const allDone = countBadges() === 4 && !state.contractSigned;
-          drawFloatingTag(ex + 16, ey - 4, allDone ? '★ CONTRATO!' : 'LUCAS', allDone ? '#ca8a04' : '#2563eb');
-        } else if (ent.type === 'mission') {
-          const done = state.progress[ent.area]['m' + ent.mNum];
-          drawFloatingTag(ex + 16, ey - 4, done ? `✓ M${ent.mNum}` : `! MISSÃO ${ent.mNum}`, done ? '#15803d' : '#2563eb');
-        }
+        renderList.push({
+          y: ey + 24,
+          draw: () => {
+            drawPixelChar(ctx, ex + 2, ey + 2, 28, ent.char, 'down', 0);
+            if (ent.type === 'guide') {
+              const allDone = countBadges() === 4 && !state.contractSigned;
+              drawFloatingTag(ex + 16, ey - 4, allDone ? '★ CONTRATO!' : 'LUCAS', allDone ? '#ca8a04' : '#2563eb');
+            } else if (ent.type === 'mission') {
+              const done = state.progress[ent.area]['m' + ent.mNum];
+              drawFloatingTag(ex + 16, ey - 4, done ? `✓ M${ent.mNum}` : `! MISSÃO ${ent.mNum}`, done ? '#15803d' : '#2563eb');
+            }
+          }
+        });
       }
     });
 
     // 3. Jogador (Helena)
-    drawPixelChar(ctx, state.player.x - 3, state.player.y - 4, 28, 'helena', state.player.dir, state.player.frame);
+    renderList.push({
+      y: state.player.y + state.player.h,
+      draw: () => drawPixelChar(ctx, state.player.x - 3, state.player.y - 4, 28, 'helena', state.player.dir, state.player.frame)
+    });
+
+    // Ordena por profundidade Y para renderização 2.5D correta
+    renderList.sort((a, b) => a.y - b.y);
+    renderList.forEach(item => item.draw());
 
     // 4. Rótulos das Portas/Setores
     if (map.labels) {
