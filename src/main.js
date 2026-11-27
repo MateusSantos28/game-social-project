@@ -2081,6 +2081,97 @@
     }
   }
 
+  function drawRoomDecorations(theme) {
+    const x = 5 * TILE;
+    const y = 2;
+
+    ctx.save();
+
+    if (theme === 'dev') {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 2, y + 2, 156, 26);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(x + 4, y + 4, 152, 3);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(x + 5, y + 8, 150, 15);
+      ctx.font = 'bold 8px monospace';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('</>', x + 10, y + 19);
+      ctx.fillStyle = '#4ade80';
+      ctx.fillRect(x + 42, y + 10, 42, 2);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(x + 42, y + 14, 58, 2);
+      ctx.fillStyle = '#c084fc';
+      ctx.fillRect(x + 42, y + 18, 33, 2);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 107, y + 10, 40, 2);
+      ctx.fillRect(x + 107, y + 14, 29, 2);
+      ctx.fillRect(x + 107, y + 18, 45, 2);
+    } else if (theme === 'manut') {
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(x + 2, y + 2, 156, 26);
+      ctx.fillStyle = '#78716c';
+      ctx.fillRect(x + 5, y + 5, 150, 20);
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(x + 7, y + 7, 146, 3);
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(x + 10, y + 12, 136, 10);
+      ctx.fillStyle = '#d6d3d1';
+      ctx.fillRect(x + 21, y + 12, 4, 8);
+      ctx.fillRect(x + 18, y + 12, 10, 3);
+      ctx.fillRect(x + 48, y + 13, 3, 7);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(x + 45, y + 11, 9, 4);
+      ctx.fillStyle = '#60a5fa';
+      ctx.fillRect(x + 76, y + 12, 18, 8);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(x + 80, y + 14, 10, 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(x + 119, y + 13, 18, 7);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 122, y + 15, 12, 3);
+    } else if (theme === 'adm') {
+      ctx.fillStyle = '#713f12';
+      ctx.fillRect(x + 2, y + 2, 156, 26);
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(x + 5, y + 5, 150, 20);
+      ctx.font = 'bold 7px monospace';
+      ctx.fillStyle = '#78350f';
+      ctx.fillText('QUADRO KANBAN', x + 9, y + 12);
+      const cardColors = ['#60a5fa', '#facc15', '#4ade80'];
+      cardColors.forEach((color, index) => {
+        const cardX = x + 9 + index * 47;
+        ctx.fillStyle = color;
+        ctx.fillRect(cardX, y + 15, 40, 8);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+        ctx.fillRect(cardX + 4, y + 17, 24, 1);
+        ctx.fillRect(cardX + 4, y + 20, 31, 1);
+      });
+    } else if (theme === 'redes') {
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(x + 2, y + 2, 156, 26);
+      ctx.fillStyle = '#312e81';
+      ctx.fillRect(x + 5, y + 5, 150, 20);
+      for (let rack = 0; rack < 3; rack++) {
+        const rackX = x + 10 + rack * 49;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(rackX, y + 7, 42, 16);
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(rackX + 3, y + 9, 36, 3);
+        ctx.fillRect(rackX + 3, y + 14, 36, 3);
+        ctx.fillRect(rackX + 3, y + 19, 36, 2);
+        ctx.fillStyle = (animTick + rack * 8) % 24 < 12 ? '#4ade80' : '#22d3ee';
+        ctx.fillRect(rackX + 6, y + 10, 2, 1);
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(rackX + 6, y + 15, 2, 1);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(rackX + 6, y + 19, 2, 1);
+      }
+    }
+
+    ctx.restore();
+  }
+
   /* ==========================================================================
      SOFÁ RETRÔ DA SALA DE ADMINISTRAÇÃO (ESTILO POKÉMON FIRERED / TOP-DOWN 2D)
   ========================================================================== */
@@ -2213,6 +2304,7 @@
         drawTile(c, r, map.grid[r][c], map.theme);
       }
     }
+    if (map.theme !== 'courtyard') drawRoomDecorations(map.theme);
 
     // 2. Renderiza Entidades e Jogador ordenados por profundidade Y (efeito de profundidade 2.5D)
     const renderList = [];
