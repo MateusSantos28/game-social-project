@@ -1,6 +1,13 @@
 (() => {
   'use strict';
 
+  const TILE = 32;
+  const COLS = 15;
+  const ROWS = 10;
+  const PLAYER_SPEED = 2.4;
+  const CANVAS_WIDTH = 480;
+  const CANVAS_HEIGHT = 320;
+
   /* ==========================================================================
      1. SISTEMA DE ÁUDIO 8-BIT (WEB AUDIO API — SEM ARQUIVOS EXTERNOS)
   ========================================================================== */
@@ -214,10 +221,6 @@
   /* ==========================================================================
      2. ESTADO GLOBAL DO JOGO
   ========================================================================== */
-  const TILE = 32;
-  const COLS = 15;
-  const ROWS = 10;
-
   const state = {
     mode: 'title', // title | explore | dialogue | minigame | battle | contract | hof
     currentMap: 'courtyard',
@@ -361,9 +364,6 @@
   // 3: Mesa / Bancada / Rack sólido
   // 4: Tapete / Porta de transição
   // 5: Placa informativa (interagível)
-  // 6: Caminho / Trilha de lajotas em direção às portas do pátio
-  // 7: Balanço interativo (assento)
-  // 8: Árvore decorativa com tronco sólido
 
   const MAPS = {
     courtyard: {
@@ -1911,6 +1911,8 @@
      11. RENDERIZAÇÃO DO MAPA TOP-DOWN (ESTILO POKÉMON FIRERED)
   ========================================================================== */
   const canvas = document.getElementById('gameCanvas');
+  canvas.width = CANVAS_WIDTH;
+  canvas.height = CANVAS_HEIGHT;
   const ctx = canvas.getContext('2d');
   let animTick = 0;
 
@@ -2105,12 +2107,11 @@
   function updatePlayer() {
     if (state.mode !== 'explore' || transitioning) return;
 
-    const speed = 2.4;
     let dx = 0, dy = 0;
-    if (state.keys.up) { dy = -speed; state.player.dir = 'up'; }
-    else if (state.keys.down) { dy = speed; state.player.dir = 'down'; }
-    else if (state.keys.left) { dx = -speed; state.player.dir = 'left'; }
-    else if (state.keys.right) { dx = speed; state.player.dir = 'right'; }
+    if (state.keys.up) { dy = -PLAYER_SPEED; state.player.dir = 'up'; }
+    else if (state.keys.down) { dy = PLAYER_SPEED; state.player.dir = 'down'; }
+    else if (state.keys.left) { dx = -PLAYER_SPEED; state.player.dir = 'left'; }
+    else if (state.keys.right) { dx = PLAYER_SPEED; state.player.dir = 'right'; }
 
     if (dx !== 0 || dy !== 0) {
       const nx = state.player.x + dx;
