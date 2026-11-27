@@ -393,7 +393,7 @@
         { x: 11, y: 9, to: 'redes', tx: 7, ty: 8, dir: 'up' }
       ],
       entities: [
-        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 5, char: 'lucas' },
+        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 3 , char: 'lucas' },
         { id: 'sign1', type: 'sign', x: 6, y: 1, text: 'EEEP JAIME ALENCAR DE OLIVEIRA — Curso Técnico em Desenvolvimento de Sistemas. Explore as 4 áreas!' },
         { id: 'sign2', type: 'sign', x: 8, y: 1, text: 'Norte-Oeste: Desenvolvimento | Norte-Leste: Manutenção | Sul-Oeste: Administração | Sul-Leste: Redes.' }
       ]
