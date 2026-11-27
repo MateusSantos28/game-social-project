@@ -602,7 +602,7 @@
   // 3: Mesa / Bancada / Rack sólido
   // 4: Tapete / Porta de transição
   // 5: Placa informativa (interagível)
-  // 6: Tapete central do Pátio
+  // 6: Caminho / Trilha de lajotas em direção às portas do pátio
   // 7: Balanço interativo (assento)
   // 8: Árvore decorativa com tronco sólido
 
@@ -611,14 +611,14 @@
       theme: 'courtyard',
       grid: [
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1],
-        [1,2,2,0,2,8,5,8,5,8,2,0,2,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,2,2,0,2,8,8,0,8,8,2,0,2,2,1],
+        [1,2,2,6,2,8,5,8,5,8,2,6,2,2,1],
+        [1,2,0,6,0,0,6,6,6,0,0,6,0,2,1],
+        [1,2,0,0,6,0,0,6,0,0,6,0,0,2,1],
+        [1,2,0,0,0,6,0,6,0,6,0,0,0,2,1],
+        [1,0,0,0,0,0,6,6,6,0,0,0,0,0,1],
+        [1,2,0,0,0,6,0,6,0,6,0,0,0,2,1],
+        [1,2,0,0,6,0,0,6,0,0,6,0,0,2,1],
+        [1,2,2,6,0,0,6,6,6,0,0,6,2,2,1],
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1]
       ],
       labels: [
@@ -2233,25 +2233,28 @@
         ctx.fillRect(x + 18, y + 10, 4, 4);
       }
     } else if (tile === 4) {
-      // Tapete / Portal de entrada
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
-      ctx.fillStyle = '#fde047';
-      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
-    } else if (tile === 6) {
-      // Tapete circular em tons de marrom elegante
+      // Porta de madeira detalhada com maçaneta dourada (abre ao pisar)
       ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 2);
+      // Painel interno da porta
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 8);
+      // Maçaneta dourada
+      ctx.fillStyle = '#fbbf24';
       ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 2 - 2, 0, Math.PI * 2);
+      ctx.arc(x + TILE - 8, y + TILE / 2, 3, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#b45309';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 5, 0, Math.PI * 2);
-      ctx.fill();
+      // Detalhe de luz / brilho superior
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, 3);
+    } else if (tile === 6) {
+      // Caminho verde natural (combinando com a grama do exterior/escola)
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
+      ctx.fillStyle = '#4ade80';
+      ctx.fillRect(x + 10, y + 10, TILE - 20, 2);
     } else if (tile === 7) {
       // Balanço (Assento de madeira com cordas)
       ctx.fillStyle = '#e2e8f0';
