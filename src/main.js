@@ -2292,7 +2292,9 @@
   /* ==========================================================================
      14. INICIALIZAÇÃO
   ========================================================================== */
-  window.onload = () => {
+  function initGame() {
+    if (initGame._done) return;
+    initGame._done = true;
     renderPortrait('titleLucas', 'lucas');
     renderPortrait('titleHelena', 'helena');
     setupSignaturePad();
@@ -2302,7 +2304,14 @@
     }
     updateHUD();
     gameLoop();
-  };
+  }
+
+  window.onload = initGame;
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initGame);
+  } else {
+    initGame();
+  }
 })();
 
 

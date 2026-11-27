@@ -7,5 +7,6 @@ Itens verificados no código atual, sem correções nesta etapa:
 - [ ] Remover estilos inline do HTML e dos templates HTML gerados em JavaScript.
 - [ ] Centralizar os números fixos restantes de desenho, minijogos e combate; os valores básicos de tile, grade, velocidade e canvas já estão em constantes, mas ainda há literais numéricos espalhados.
 - [ ] Avaliar e integrar a funcionalidade “pátio novo” associada ao commit `46f9260`.
+- [ ] Limpar avisos do ESLint em `src/main.js` nas fases de modularização (variáveis não utilizadas `e` em blocos `catch`, blocos `catch` vazios e atribuições sobrescritas `obj`, `dmg`, `msg`).
 
 Nota: o tile 9 já é tratado como sólido em `isSolidAt()` e não é um problema pendente.
