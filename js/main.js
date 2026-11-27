@@ -1,4 +1,3 @@
-
 (() => {
   'use strict';
 
@@ -362,29 +361,20 @@
   // 3: Mesa / Bancada / Rack sólido
   // 4: Tapete / Porta de transição
   // 5: Placa informativa (interagível)
-  // 6: Tapete central do Pátio
-  // 7: Balanço interativo (assento)
-  // 9: Sofá de recepção / descanso (Administração)
 
-
-
-
-
-
-  //POSIÇÃO DAS COISAS AQUI
   const MAPS = {
     courtyard: {
       theme: 'courtyard',
       grid: [
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1],
-        [1,2,8,0,2,8,5,8,5,8,2,0,8,2,1],
+        [1,2,2,0,2,1,5,1,5,1,2,0,2,2,1],
         [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,8,0,0,0,0,0,0,0,0,0,0,0,8,1],
         [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
-        [1,8,0,0,0,0,0,0,0,0,0,0,0,8,1],
-        [1,2,8,0,2,8,8,0,8,8,2,0,8,2,1],
+        [1,2,0,0,0,0,0,0,0,0,0,0,0,2,1],
+        [1,2,2,0,2,1,1,0,1,1,2,0,2,2,1],
         [1,1,1,4,1,1,1,1,1,1,1,4,1,1,1]
       ],
       labels: [
@@ -399,8 +389,9 @@
         { x: 3, y: 9, to: 'adm', tx: 7, ty: 8, dir: 'up' },
         { x: 11, y: 9, to: 'redes', tx: 7, ty: 8, dir: 'up' }
       ],
+  // Mapeamento de entidades no mapa Courtyard (Helena é a player, Lucas é o guia no pátio)
       entities: [
-        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 3, char: 'lucas' },
+        { id: 'lucas', type: 'guide', name: 'Lucas', x: 7, y: 4, char: 'lucas' },
         { id: 'sign1', type: 'sign', x: 6, y: 1, text: 'EEEP JAIME ALENCAR DE OLIVEIRA — Curso Técnico em Desenvolvimento de Sistemas. Explore as 4 áreas!' },
         { id: 'sign2', type: 'sign', x: 8, y: 1, text: 'Norte-Oeste: Desenvolvimento | Norte-Leste: Manutenção | Sul-Oeste: Administração | Sul-Leste: Redes.' }
       ]
@@ -456,11 +447,11 @@
       areaKey: 'adm',
       grid: [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,3,3,0,0,0,3,3,3,0,0,0,3,3,1],
+        [1,3,3,0,0,0,0,0,0,0,0,0,3,3,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,3,0,0,0,0,0,0,0,3,0,0,1],
+        [1,0,0,3,0,0,0,0,0,0,0,3,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,9,0,0,0,0,0,0,0,9,0,0,1],
-        [1,0,0,9,0,0,0,0,0,0,0,9,0,0,1],
         [1,0,3,3,0,0,0,0,0,0,0,3,3,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -471,7 +462,7 @@
       entities: [
         { id: 'adm_m1', type: 'mission', area: 'adm', mNum: 1, name: 'Analista Caixa', x: 4, y: 5, char: 'npc' },
         { id: 'adm_m2', type: 'mission', area: 'adm', mNum: 2, name: 'Quadro Kanban', x: 10, y: 5, char: 'npc' },
-        { id: 'adm_boss', type: 'boss', area: 'adm', name: 'Maryanne & Wendila', x: 7, y: 1, char: 'maryanne', char2: 'wendila' }
+        { id: 'adm_boss', type: 'boss', area: 'adm', name: 'Maryanne & Wendila', x: 7, y: 2, char: 'maryanne', char2: 'wendila' }
       ]
     },
     redes: {
@@ -597,7 +588,7 @@
 
   function talkToHelena() {
     const earned = countBadges();
-wd
+
     // Cena Final se conquistou as 4 insígnias
     if (earned === 4 && !state.contractSigned) {
       Sound.fanfare();
@@ -1839,14 +1830,14 @@ wd
       const r = Math.floor(pt.y / TILE);
       if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return true;
       const tile = map.grid[r][c];
-      if (tile === 1 || tile === 3 || tile === 5 || tile === 7 || tile === 8) return true;
+      if (tile === 1 || tile === 3 || tile === 5) return true;
 
       // Colisão com NPCs e Chefes
       for (const ent of map.entities) {
         if (ent.type === 'sign') continue;
         const ex = ent.x * TILE;
         const ey = ent.y * TILE;
-        if (pt.x > ex + 3 && pt.x < ex + TILE - 3 && pt.y > ey + 1 && pt.y < ey + TILE - 2) {
+        if (pt.x > ex + 3 && pt.x < ex + TILE - 3 && pt.y > ey + 4 && pt.y < ey + TILE - 2) {
           return true;
         }
       }
@@ -1891,8 +1882,8 @@ wd
 
     if (target.type === 'guide') {
       talkToHelena();
-    } else if (target.type === 'sign' || target.type === 'swing') {
-      Dialogue.start([{ speaker: target.type === 'swing' ? 'BALANÇO DA ESCOLA' : 'PLACA DA ESCOLA', char: 'helena', text: target.text }]);
+    } else if (target.type === 'sign') {
+      Dialogue.start([{ speaker: 'PLACA DA ESCOLA', char: 'lucas', text: target.text }]);
     } else if (target.type === 'mission') {
       startMinigame(target.area, target.mNum);
     } else if (target.type === 'boss') {
@@ -1927,16 +1918,8 @@ wd
 
     // Fundo base (chão)
     if (theme === 'courtyard') {
-      // Chão de madeira rústica e aconchegante para substituir o tom branco
-      ctx.fillStyle = (c + r) % 2 === 0 ? '#b45309' : '#92400e';
+      ctx.fillStyle = (c + r) % 2 === 0 ? '#e5e7eb' : '#dbe2ea';
       ctx.fillRect(x, y, TILE, TILE);
-      // Linhas da tábua de madeira
-      ctx.fillStyle = '#78350f';
-      ctx.fillRect(x, y + TILE - 4, TILE, 4);
-      if (c % 2 === 0) {
-        ctx.fillStyle = 'rgba(0,0,0,0.12)';
-        ctx.fillRect(x + TILE / 2 - 1, y, 2, TILE - 4);
-      }
     } else if (theme === 'dev') {
       ctx.fillStyle = (c + r) % 2 === 0 ? '#dbeafe' : '#cfe2ff';
       ctx.fillRect(x, y, TILE, TILE);
@@ -1989,13 +1972,8 @@ wd
         ctx.fillStyle = '#f97316';
         ctx.fillRect(x + 5, y + 8, TILE - 10, 10);
       } else if (theme === 'adm') {
-        // Mesa com computador / monitor de administração
-        ctx.fillStyle = '#b45309';
-        ctx.fillRect(x + 2, y + 8, TILE - 4, TILE - 10);
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(x + 8, y + 4, 16, 12);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(x + 10, y + 6, 12, 8);
+        ctx.fillStyle = '#ca8a04';
+        ctx.fillRect(x + 4, y + 6, TILE - 8, TILE - 12);
       } else {
         ctx.fillStyle = '#1e1b4b';
         ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
@@ -2009,55 +1987,15 @@ wd
       ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
       ctx.fillStyle = '#fde047';
       ctx.fillRect(x + 6, y + 6, TILE - 12, TILE - 12);
-    } else if (tile === 6) {
-      // Tapete circular clássico em tons de marrom liso e aconchegante
+    } else if (tile === 5) {
+      // Placa de madeira
       ctx.fillStyle = '#78350f';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 2 - 2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(x + 13, y + 18, 6, 12);
       ctx.fillStyle = '#b45309';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 3 + 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + TILE / 2, TILE / 4, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (tile === 7) {
-      if (theme === 'adm') {
-        // Cadeira de escritório acolchoada na Administração
-        ctx.fillStyle = '#334155';
-        ctx.fillRect(x + 8, y + 6, TILE - 16, TILE - 12);
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(x + 10, y + 4, TILE - 20, 6);
-      } else {
-        // Balanço padrão
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillRect(x + 6, y + 2, 3, TILE - 4);
-        ctx.fillRect(x + TILE - 9, y + 2, 3, TILE - 4);
-        ctx.fillStyle = '#92400e';
-        ctx.fillRect(x + 4, y + 16, TILE - 8, 8);
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(x + 12, y + 8, 8, 8);
-      }
-    } else if (tile === 8) {
-      // Árvore com tronco sólido e copa verde exuberante
-      ctx.fillStyle = '#78350f';
-      ctx.fillRect(x + 10, y + 18, 12, 14);
-      ctx.fillStyle = '#15803d';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2, y + 12, 14, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#22c55e';
-      ctx.beginPath();
-      ctx.arc(x + TILE / 2 - 4, y + 10, 8, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (tile === 9) {
-      // Sofá aconchegante para a sala de Administração
-      ctx.fillStyle = '#b45309';
-      ctx.fillRect(x + 2, y + 6, TILE - 4, TILE - 10);
-      ctx.fillStyle = '#d97706';
-      ctx.fillRect(x + 4, y + 8, TILE - 8, TILE - 14);
+      ctx.fillRect(x + 4, y + 4, TILE - 8, 16);
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(x + 7, y + 8, TILE - 14, 3);
+      ctx.fillRect(x + 7, y + 13, TILE - 18, 3);
     }
   }
 
@@ -2079,11 +2017,8 @@ wd
       const ey = ent.y * TILE;
 
       if (ent.type === 'boss') {
-        const offsetLeft = ent.area === 'adm' ? -16 : -10;
-        const offsetRight = ent.area === 'adm' ? 16 : 12;
-        const verticalOffset = ent.area === 'adm' ? 18 : 4;
-        drawPixelChar(ctx, ex + offsetLeft, ey + verticalOffset, 28, ent.char, 'down', 0);
-        drawPixelChar(ctx, ex + offsetRight, ey + verticalOffset, 28, ent.char2, 'down', 0);
+        drawPixelChar(ctx, ex - 10, ey, 28, ent.char, 'down', 0);
+        drawPixelChar(ctx, ex + 12, ey, 28, ent.char2, 'down', 0);
         const prog = state.progress[ent.area];
         const tag = prog.boss ? '★ VENCIDOS' : (prog.m1 && prog.m2) ? '⚔️ DESAFIAR!' : '🔒 FAÇA 2 MISSÕES';
         drawFloatingTag(ex + 16, ey - 6, tag, prog.boss ? '#16a34a' : (prog.m1 && prog.m2) ? '#dc2626' : '#475569');
